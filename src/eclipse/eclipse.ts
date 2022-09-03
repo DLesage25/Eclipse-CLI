@@ -1,15 +1,11 @@
 import 'reflect-metadata';
 import minimist from 'minimist';
 import * as packageJson from '../../package.json';
-import { red, green, default as kleur } from 'kleur';
 
 import { inject, injectable } from 'inversify';
 import { Options } from './options';
 import { Auth } from './auth/auth';
-
-const figlet = require('figlet');
-
-kleur.enabled = require('color-support').level;
+import { Logger } from './utils/logger';
 
 @injectable()
 export class Eclipse {
@@ -17,22 +13,23 @@ export class Eclipse {
 
     constructor(
         @inject('Options') private options: Options,
-        @inject('Auth') private auth: Auth
+        @inject('Auth') private auth: Auth,
+        @inject('Logger') private logger: Logger
     ) {
         try {
             this.execute()
                 .then((success) => {
-                    this.showSpacesLog();
+                    this.logger.verticalSeparator();
                     if (!success && !this.suppressError) {
                         process.exit(1);
                     }
                 })
-                .catch((err) => console.error(err));
+                .catch((err) => logger.error(err));
         } catch (error) {
             if (error instanceof Error) {
-                console.log(red(error.message));
+                logger.error(error.message);
             } else {
-                console.log(red(`${error}`));
+                logger.error(`${error}`);
             }
             if (!this.suppressError) {
                 process.exit(1);
@@ -65,35 +62,27 @@ export class Eclipse {
         }
 
         if (projectInput === undefined && !showHelp && !showVersion) {
-            console.error(
-                red(
-                    'Unknown command, run eclipse -h or eclipse --help for a list of commands.'
-                )
+            this.logger.error(
+                'Unknown command, run eclipse -h or eclipse --help for a list of commands.'
             );
             return false;
         }
 
-        this.auth.initializeAuthFlow();
+        await this.auth.checkIfAuthFlowRequired();
 
         return true;
     }
 
     private showIntroLog(): void {
-        console.log(figlet.textSync('EclipseJS', { horizontalLayout: 'full' }));
-        console.log(green(`Inject environment variables on runtime.`));
+        this.logger.banner('EclipseJS', { horizontalLayout: 'full' });
+        this.logger.message(`Inject environment variables on runtime.`);
     }
 
     private showToolVersion(): void {
-        console.log(`Version: ${packageJson.version}`);
+        this.logger.message(`Version: ${packageJson.version}`);
     }
 
     private showHelpLog(): void {
         this.options.showOptions();
-    }
-
-    private showSpacesLog(): void {
-        console.log('');
-        console.log('');
-        console.log('');
     }
 }

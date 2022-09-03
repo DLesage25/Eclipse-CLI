@@ -1,11 +1,12 @@
 import { red } from 'kleur';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
-import { AuthFile } from './authFile';
 import http from 'http';
 import url from 'url';
 import open from 'open';
 import axios from 'axios';
+import { FileUtil } from '../utils/fileUtil';
+import { Logger } from '../utils/logger';
 
 const requestUserToken = (codeVerifier: string, code: string) => {
     return axios({
@@ -21,24 +22,63 @@ const requestUserToken = (codeVerifier: string, code: string) => {
         }),
     })
         .then((res) => {
-            console.log('axios response');
-            console.log(res.data);
+            const { access_token, expires_in } = res.data;
+            return { access_token, expires_in };
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+            throw new Error('Error attempting to request user token - ' + err);
+        });
 };
 
 @injectable()
 export class Auth {
     private codeVerifier: string;
-    constructor(@inject('AuthFile') private authFile: AuthFile) {
+    constructor(
+        @inject('AuthFile') private authFileUtil: FileUtil,
+        @inject('Logger') private logger: Logger
+    ) {
         this.codeVerifier = this.createCodeVerifier();
+    }
+
+    public async checkIfAuthFlowRequired() {
+        const fileExists = await this.authFileUtil.find();
+        const tokenExpired = fileExists && (await this.checkIfTokenExpired());
+
+        if (!fileExists || tokenExpired) {
+            return this.initializeAuthFlow();
+        }
+
+        this.logger.success('Session restored. Welcome back!');
+
+        return;
     }
 
     public async initializeAuthFlow() {
         const codeChallenge = this.createCodeChallenge(this.codeVerifier);
-        const authUrl = this.constructAuthUrl(codeChallenge, 'abc123'); //todo - store this in auth file
+        const authUrl = this.constructAuthUrl(codeChallenge, 'abc123');
         this.createAuthServer();
         await this.openAuthPage(authUrl);
+
+        this.logger.success('You are now logged in!');
+
+        return;
+    }
+
+    public async getAccessToken() {
+        const rawData = await this.authFileUtil.read();
+        const fileData = this.authFileUtil.fileNotationToObject(rawData);
+
+        return fileData.access_token;
+    }
+
+    private async checkIfTokenExpired() {
+        const rawFileData = await this.authFileUtil.read();
+        const fileData = this.authFileUtil.fileNotationToObject(rawFileData);
+
+        if (fileData.expires_in && Number(fileData.expires_in) <= Date.now()) {
+            return true;
+        }
+        return false;
     }
 
     private base64URLEncode(str: Buffer) {
@@ -63,53 +103,21 @@ export class Auth {
 
     private createAuthServer() {
         return http
-            .createServer(this.handleAuthResponse(this.codeVerifier))
+            .createServer(
+                this.handleAuthResponse(
+                    this.codeVerifier,
+                    this.authFileUtil,
+                    this.logger
+                )
+            )
             .listen(process.env.AUTH_SERVER_PORT, (err?: Error) => {
                 if (err) {
-                    console.log(
-                        `Unable to start an HTTP server on port ${process.env.AUTH_SERVER_PORT}.`,
-                        err
+                    this.logger.error(
+                        `Unable to start an HTTP server on port ${process.env.AUTH_SERVER_PORT}: ${err}`
                     );
                 }
             });
     }
-
-    private handleAuthResponse =
-        (codeVerifier: string) =>
-        async (req: http.IncomingMessage, res: http.ServerResponse) => {
-            if (!req.url) return;
-
-            const urlQuery = url.parse(req.url, true).query;
-            const { code, state, error, error_description } = urlQuery;
-
-            // this validation was simplified for the example
-            if (code && state) {
-                res.write(`
-                <html>
-                <body>
-                    <h1>LOGIN SUCCEEDED</h1>
-                </body>
-                </html>
-                `);
-            } else {
-                res.write(`
-                <html>
-                <body>
-                    <h1>LOGIN FAILED</h1>
-                    <div>${error}</div>
-                    <div>${error_description}
-                </body>
-                </html>
-                `);
-                return;
-            }
-
-            console.log({ code, verf: codeVerifier });
-
-            await requestUserToken(codeVerifier, code as string);
-
-            return res.end();
-        };
 
     private constructAuthUrl(codeChallenge: string, state: string): string {
         return [
@@ -118,9 +126,9 @@ export class Auth {
             `&code_challenge_method=S256`,
             `&code_challenge=${codeChallenge}`,
             `&client_id=${process.env.AUTH_CLIENT_ID}`,
-            `&redirect_uri=${process.env.AUTH_CALLBACK_URL as string}`,
+            `&redirect_uri=${process.env.AUTH_CALLBACK_URL}`,
             `&scope=email`,
-            `&audience=http://api.tuple.com`,
+            `&audience=${process.env.AUTH_TARGET_AUDIENCE}`,
             `&state=${state}`,
         ].join('');
     }
@@ -128,10 +136,57 @@ export class Auth {
     private async openAuthPage(authUrl: string) {
         try {
             await open(authUrl, { wait: true, newInstance: true });
-            return true;
-        } catch (e) {
-            console.log(red(`${e}`));
-            return null;
+            return;
+        } catch (err) {
+            this.logger.error(
+                `Error attempting to open authentication page in browser: ${err}`
+            );
+            return;
         }
     }
+
+    private handleAuthResponse =
+        (codeVerifier: string, authFileUtil: FileUtil, logger: Logger) =>
+        async (req: http.IncomingMessage, res: http.ServerResponse) => {
+            if (!req.url) return;
+
+            const urlQuery = url.parse(req.url, true).query;
+            const { code, state, error, error_description } = urlQuery;
+
+            // TODO - generate state based on user email and validate here
+            if (code && state) {
+                res.write(`
+            <html>
+            <body>
+                <h1>LOGIN SUCCEEDED</h1>
+            </body>
+            </html>
+            `);
+            } else {
+                res.write(`
+            <html>
+            <body>
+                <h1>LOGIN FAILED</h1>
+                <div>${error}</div>
+                <div>${error_description}
+            </body>
+            </html>
+            `);
+                return;
+            }
+            try {
+                const { access_token, expires_in } = await requestUserToken(
+                    codeVerifier,
+                    code as string
+                );
+
+                const expiration_date = Date.now() + expires_in;
+
+                authFileUtil.createOrUpdate({ access_token, expiration_date });
+
+                return res.end();
+            } catch (err) {
+                logger.error(`Error attempting to save access token: ${err}`);
+            }
+        };
 }

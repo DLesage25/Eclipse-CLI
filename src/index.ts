@@ -1,20 +1,27 @@
 import 'reflect-metadata';
-require('dotenv').config();
-console.log(process.env);
+import os from 'os';
 
 import { Container } from 'inversify';
-import { AuthFile } from './eclipse/auth/authFile';
+import { FileUtil } from './eclipse/utils/fileUtil';
 import { Eclipse } from './eclipse/eclipse';
 import { Options } from './eclipse/options';
 import { Auth } from './eclipse/auth/auth';
+import { Logger } from './eclipse/utils/logger';
+import { API } from './eclipse/api';
+
+require('dotenv').config();
 
 export function index(): Eclipse {
     const container: Container = new Container();
 
     container.bind<Eclipse>('Eclipse').to(Eclipse).inSingletonScope();
     container.bind<Options>('Options').to(Options).inSingletonScope();
-    container.bind<AuthFile>('AuthFile').to(AuthFile).inSingletonScope();
+    container
+        .bind<FileUtil>('AuthFile')
+        .toDynamicValue(() => new FileUtil(`${os.homedir()}/.eclipserc`));
     container.bind<Auth>('Auth').to(Auth).inSingletonScope();
+    container.bind<Logger>('Logger').to(Logger).inSingletonScope();
+    container.bind<API>('API').to(API).inSingletonScope();
 
     return container.get<Eclipse>('Eclipse');
 }
