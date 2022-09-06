@@ -8,6 +8,7 @@ import { Options } from './eclipse/options';
 import { Auth } from './eclipse/auth/auth';
 import { Logger } from './eclipse/utils/logger';
 import { API } from './eclipse/api';
+import { Projects } from './eclipse/projects';
 
 require('dotenv').config();
 
@@ -22,6 +23,7 @@ export function index(): Eclipse {
     container.bind<Auth>('Auth').to(Auth).inSingletonScope();
     container.bind<Logger>('Logger').to(Logger).inSingletonScope();
     container.bind<API>('API').to(API).inSingletonScope();
+    container.bind<Projects>('Projects').to(Projects).inSingletonScope();
 
     return container.get<Eclipse>('Eclipse');
 }

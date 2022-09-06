@@ -6,6 +6,8 @@ import { inject, injectable } from 'inversify';
 import { Options } from './options';
 import { Auth } from './auth/auth';
 import { Logger } from './utils/logger';
+import { API } from './api';
+import { Projects } from './projects';
 
 @injectable()
 export class Eclipse {
@@ -14,7 +16,9 @@ export class Eclipse {
     constructor(
         @inject('Options') private options: Options,
         @inject('Auth') private auth: Auth,
-        @inject('Logger') private logger: Logger
+        @inject('Logger') private logger: Logger,
+        @inject('API') private _api: API,
+        @inject('Projects') private projects: Projects
     ) {
         try {
             this.execute()
@@ -38,6 +42,7 @@ export class Eclipse {
     }
 
     public async execute(): Promise<boolean> {
+        console.clear();
         this.showIntroLog();
 
         const argv = minimist(process.argv.slice(2), { '--': true });
@@ -61,6 +66,7 @@ export class Eclipse {
             projectInput = '.';
         }
 
+        //TODO this will never run because of the statement above.
         if (projectInput === undefined && !showHelp && !showVersion) {
             this.logger.error(
                 'Unknown command, run eclipse -h or eclipse --help for a list of commands.'
@@ -69,6 +75,11 @@ export class Eclipse {
         }
 
         await this.auth.checkIfAuthFlowRequired();
+        await this._api.Initialize();
+
+        this.logger.verticalSeparator();
+
+        await this.projects.projectSelection();
 
         return true;
     }
