@@ -75,7 +75,10 @@ export class Auth {
         const rawFileData = await this.authFileUtil.read();
         const fileData = this.authFileUtil.fileNotationToObject(rawFileData);
 
-        if (fileData.expires_in && Number(fileData.expires_in) <= Date.now()) {
+        if (
+            fileData.expiration_date &&
+            Number(fileData.expiration_date) <= Date.now()
+        ) {
             return true;
         }
         return false;
