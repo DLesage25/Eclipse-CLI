@@ -1,24 +1,18 @@
 import { inject, injectable } from 'inversify';
 import { API } from './api';
 import projectSelectionPrompt from './prompts/projectSelection.prompt';
+import { Secrets } from './secrets';
 import { Project } from './types/Project.type';
 import { objectToFileNotation } from './utils/fileUtil';
 import { Logger } from './utils/logger';
 
 @injectable()
 export class Projects {
-    private projectMethods: any;
     constructor(
         @inject('API') private _api: API,
-        @inject('Logger') private logger: Logger
-    ) {
-        this.projectMethods = {
-            view: this.viewSecrets(_api),
-            add: this.addSecret(_api),
-            remove: this.removeSecret(_api),
-            print: this.printSecrets(_api),
-        };
-    }
+        @inject('Logger') private logger: Logger,
+        @inject('Secrets') private secrets: Secrets
+    ) {}
 
     public async projectSelection() {
         const projects = await this._api.getProjects();
@@ -31,25 +25,27 @@ export class Projects {
             return;
         }
 
-        return this.projectMethods[action](selectedProject);
+        switch (action) {
+            case 'view':
+                return this.viewProjectSecrets(selectedProject);
+            case 'add':
+                return this.secrets.addSecret(selectedProject);
+            case 'remove':
+                return this.secrets.removeSecret(selectedProject);
+            case 'print':
+                return this.printSecrets(selectedProject);
+            default:
+                this.logger.warning('Command not recognized');
+                return;
+        }
     }
 
-    private viewSecrets = (_api: API) => async (project: Project) => {
-        const secrets = await _api.getSecrets(project._id);
-        const filteredSecrets = secrets.reduce((prev, secret) => {
-            return {
-                ...prev,
-                [secret.name]: secret.value,
-            };
-        }, {});
-        const formattedSecrets = objectToFileNotation(filteredSecrets);
+    private async viewProjectSecrets(project: Project) {
+        const secrets = await this.secrets.getSecrets(project);
+        const formattedSecrets = objectToFileNotation(secrets);
         this.logger.success(formattedSecrets);
         return;
-    };
+    }
 
-    private addSecret = (_api: API) => async (project: Project) => {};
-
-    private removeSecret = (_api: API) => async (project: Project) => {};
-
-    private printSecrets = (_api: API) => async (project: Project) => {};
+    private async printSecrets(project: Project) {}
 }

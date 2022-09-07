@@ -1,5 +1,6 @@
 import axios, { Axios } from 'axios';
 import { inject, injectable } from 'inversify';
+import { CreateSecretDto } from './dtos/createSecret.dto';
 import { Project } from './types/Project.type';
 import { RevealedSecret } from './types/Secret.type';
 import { fileNotationToObject, FileUtil } from './utils/fileUtil';
@@ -49,6 +50,18 @@ export class API {
                     },
                 },
             })
+            .then((res) => res.data);
+    }
+
+    public async createSecret(createSecretDto: CreateSecretDto) {
+        return this._http
+            .post('/secrets', createSecretDto)
+            .then((res) => res.data);
+    }
+
+    public async deleteSecret(secretId: string) {
+        return this._http
+            .delete(`/secrets/${secretId}`)
             .then((res) => res.data);
     }
 }
