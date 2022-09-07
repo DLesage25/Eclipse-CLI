@@ -1,14 +1,14 @@
-import { Axios } from 'axios';
+import axios, { Axios } from 'axios';
 import { inject, injectable } from 'inversify';
-import { Auth } from './auth/auth';
 import { Project } from './types/Project.type';
-import { FileUtil } from './utils/fileUtil';
+import { RevealedSecret } from './types/Secret.type';
+import { fileNotationToObject, FileUtil } from './utils/fileUtil';
 
 @injectable()
 export class API {
     private _http: Axios;
     constructor(@inject('AuthFile') private authFileUtil: FileUtil) {
-        this._http = new Axios({
+        this._http = axios.create({
             baseURL: process.env.ECLIPSE_API_URL,
             headers: {
                 Authorization: '',
@@ -18,8 +18,7 @@ export class API {
 
     public async Initialize() {
         const rawData = await this.authFileUtil.read();
-        const { access_token } =
-            this.authFileUtil.fileNotationToObject(rawData);
+        const { access_token } = fileNotationToObject(rawData);
 
         this._http.interceptors.request.use((config) => {
             if (!config.headers) config.headers = {};
@@ -29,11 +28,8 @@ export class API {
         });
     }
 
-    //TODO - implement get user by auth code (and add to web too)
     public async getUser() {
-        return this._http
-            .get('/users/email/daniellesage25@gmail.com')
-            .then((res) => res.data);
+        return this._http.get('/users/').then((res) => res.data);
     }
 
     public async getProjects(): Promise<Project[]> {
@@ -42,5 +38,17 @@ export class API {
                 ? JSON.parse(res.data)
                 : res.data;
         });
+    }
+
+    public async getSecrets(projectId: string): Promise<RevealedSecret[]> {
+        return this._http
+            .get('/secrets/reveal', {
+                data: {
+                    project: {
+                        _id: projectId,
+                    },
+                },
+            })
+            .then((res) => res.data);
     }
 }
