@@ -26,6 +26,9 @@ export function index(): Eclipse {
     container
         .bind<FileUtil>('AuthFile')
         .toDynamicValue(() => new FileUtil(`${os.homedir()}/.eclipserc`));
+    container
+        .bind<FileUtil>('EnvFile')
+        .toDynamicValue(() => new FileUtil('./.env'));
 
     return container.get<Eclipse>('Eclipse');
 }

@@ -3,7 +3,7 @@ import { API } from './api';
 import projectSelectionPrompt from './prompts/projectSelection.prompt';
 import { Secrets } from './secrets';
 import { Project } from './types/Project.type';
-import { objectToFileNotation } from './utils/fileUtil';
+import { FileUtil, objectToFileNotation } from './utils/fileUtil';
 import { Logger } from './utils/logger';
 
 @injectable()
@@ -11,7 +11,8 @@ export class Projects {
     constructor(
         @inject('API') private _api: API,
         @inject('Logger') private logger: Logger,
-        @inject('Secrets') private secrets: Secrets
+        @inject('Secrets') private secrets: Secrets,
+        @inject('EnvFile') private envFile: FileUtil
     ) {}
 
     public async projectSelection() {
@@ -47,5 +48,10 @@ export class Projects {
         return;
     }
 
-    private async printSecrets(project: Project) {}
+    private async printSecrets(project: Project) {
+        const secrets = await this.secrets.getSecrets(project);
+        await this.envFile.createOrUpdate(secrets);
+        this.logger.success('Environment file printed on working directory.');
+        return;
+    }
 }
