@@ -1,11 +1,10 @@
-import { red } from 'kleur';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import http from 'http';
 import url from 'url';
 import open from 'open';
 import axios from 'axios';
-import { FileUtil } from '../utils/fileUtil';
+import { fileNotationToObject, FileUtil } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
 
 const requestUserToken = (codeVerifier: string, code: string) => {
@@ -66,14 +65,14 @@ export class Auth {
 
     public async getAccessToken() {
         const rawData = await this.authFileUtil.read();
-        const fileData = this.authFileUtil.fileNotationToObject(rawData);
+        const fileData = fileNotationToObject(rawData);
 
         return fileData.access_token;
     }
 
     private async checkIfTokenExpired() {
         const rawFileData = await this.authFileUtil.read();
-        const fileData = this.authFileUtil.fileNotationToObject(rawFileData);
+        const fileData = fileNotationToObject(rawFileData);
 
         if (
             fileData.expiration_date &&

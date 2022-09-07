@@ -40,7 +40,7 @@ export class FileUtil {
             return this.replaceOnFile(data);
         }
 
-        const fileData = this.objectToFileNotation(data);
+        const fileData = objectToFileNotation(data);
         return this.writeFile(fileData);
     }
 
@@ -56,11 +56,11 @@ export class FileUtil {
     public async replaceOnFile(update: KeyValues) {
         try {
             const rawData = await this.read();
-            const fileData = this.fileNotationToObject(rawData);
+            const fileData = fileNotationToObject(rawData);
 
             const updatedFileData = { ...fileData, ...update };
 
-            const updateRawData = this.objectToFileNotation(updatedFileData);
+            const updateRawData = objectToFileNotation(updatedFileData);
 
             return this.writeFile(updateRawData);
         } catch (e) {
@@ -68,23 +68,23 @@ export class FileUtil {
             return false;
         }
     }
-
-    public fileNotationToObject(fileData: string): KeyValues {
-        const keyValArray = fileData.split('\n').filter((i) => i !== '');
-
-        return keyValArray.reduce((prev, current) => {
-            const keyVal = current.split('=');
-            return { ...prev, [keyVal[0]]: keyVal[1] };
-        }, {});
-    }
-
-    public objectToFileNotation(keyValues: KeyValues) {
-        const kv = { ...keyValues };
-        let formattedString = '';
-
-        for (const key in kv) {
-            formattedString += `${key}=${kv[key]}\n`;
-        }
-        return formattedString;
-    }
 }
+
+export const fileNotationToObject = (fileData: string): KeyValues => {
+    const keyValArray = fileData.split('\n').filter((i) => i !== '');
+
+    return keyValArray.reduce((prev, current) => {
+        const keyVal = current.split('=');
+        return { ...prev, [keyVal[0]]: keyVal[1] };
+    }, {});
+};
+
+export const objectToFileNotation = (keyValues: KeyValues) => {
+    const kv = { ...keyValues };
+    let formattedString = '';
+
+    for (const key in kv) {
+        formattedString += `${key}=${kv[key]}\n`;
+    }
+    return formattedString;
+};

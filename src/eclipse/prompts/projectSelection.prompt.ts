@@ -34,7 +34,7 @@ export default function projectSelectionPrompt(projects: Project[]) {
     return inquirer.prompt([
         {
             type: 'list',
-            name: 'project',
+            name: 'projectId',
             message: 'Please select a project.',
             choices: projectChoices,
         },

@@ -20,7 +20,7 @@ export function index(): Eclipse {
     container
         .bind<FileUtil>('AuthFile')
         .toDynamicValue(() => new FileUtil(`${os.homedir()}/.eclipserc`));
-    container.bind<Auth>('Auth').to(Auth).inSingletonScope();
+    container.bind<Auth>('Auth').to(Auth).inRequestScope();
     container.bind<Logger>('Logger').to(Logger).inSingletonScope();
     container.bind<API>('API').to(API).inSingletonScope();
     container.bind<Projects>('Projects').to(Projects).inSingletonScope();
