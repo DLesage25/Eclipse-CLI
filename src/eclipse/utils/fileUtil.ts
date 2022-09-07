@@ -12,6 +12,7 @@ export class FileUtil {
         this.FILE_PATH = filePath;
     }
 
+    //TODO - this still shows an ugly console error even if wrapped in a t/c clause
     public async find() {
         try {
             const stats = await fs.stat(this.FILE_PATH);

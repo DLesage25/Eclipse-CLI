@@ -182,7 +182,11 @@ export class Auth {
                     code as string
                 );
 
-                const expiration_date = Date.now() + expires_in;
+                //expires_in = seconds
+                const expiration_date = (
+                    Date.now() +
+                    expires_in * 1000
+                ).toString();
 
                 authFileUtil.createOrUpdate({ access_token, expiration_date });
 
