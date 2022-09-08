@@ -24,7 +24,10 @@ export class API {
     public async Initialize() {
         const config = await this.auth.getConfig();
 
-        if (!config) return;
+        if (!config) {
+            this.logger.error('Could not initialize API. Config not found');
+            return;
+        }
 
         const { access_token } = config;
 
