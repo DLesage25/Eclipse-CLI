@@ -11,7 +11,7 @@ import { Projects } from './projects';
 
 @injectable()
 export class Eclipse {
-    public suppressError: boolean = false;
+    public suppressError = false;
 
     constructor(
         @inject('Options') private options: Options,

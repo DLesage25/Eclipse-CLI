@@ -1,0 +1,43 @@
+name: 'Continuous Integrations'
+on: 
+    pull_request:
+        branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+    lint:
+        runs-on: ubuntu-22.04
+        name: Lint
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup node
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '16'
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Lint
+              run: npm run lint
+    build:
+        runs-on: ubuntu-22.04
+        name: Build
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup node
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '16'
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build bundle
+              run: npm run build

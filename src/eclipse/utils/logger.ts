@@ -1,7 +1,8 @@
 import { injectable } from 'inversify';
 import { red, green, yellow, dim, default as kleur } from 'kleur';
-const figlet = require('figlet');
+import figlet from 'figlet';
 
+// eslint-disable-next-line
 kleur.enabled = require('color-support').level;
 
 @injectable()
