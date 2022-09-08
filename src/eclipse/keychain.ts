@@ -3,8 +3,6 @@ import keytar from 'keytar';
 
 @injectable()
 export class KeyChain {
-    constructor() {}
-
     public async getKey(
         service: string,
         account: string
