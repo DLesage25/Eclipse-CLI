@@ -4,11 +4,15 @@ import { CreateSecretDto } from './dtos/createSecret.dto';
 import { Project } from './types/Project.type';
 import { RevealedSecret } from './types/Secret.type';
 import { fileNotationToObject, FileUtil } from './utils/fileUtil';
+import { Logger } from './utils/logger';
 
 @injectable()
 export class API {
     private _http: Axios;
-    constructor(@inject('AuthFile') private authFileUtil: FileUtil) {
+    constructor(
+        @inject('AuthFile') private authFileUtil: FileUtil,
+        @inject('Logger') private logger: Logger
+    ) {
         this._http = axios.create({
             baseURL: process.env.ECLIPSE_API_URL,
             headers: {
@@ -34,11 +38,19 @@ export class API {
     }
 
     public async getProjects(): Promise<Project[]> {
-        return this._http.get('/projects/').then((res) => {
-            return typeof res.data === 'string'
-                ? JSON.parse(res.data)
-                : res.data;
-        });
+        return this._http
+            .get('/projects/')
+            .then((res) => {
+                return typeof res.data === 'string'
+                    ? JSON.parse(res.data)
+                    : res.data;
+            })
+            .catch((err) => {
+                this.logger.error(
+                    `Error when attempting to fetch projects: ${err}`
+                );
+                return [];
+            });
     }
 
     public async getSecrets(projectId: string): Promise<RevealedSecret[]> {
@@ -50,18 +62,35 @@ export class API {
                     },
                 },
             })
-            .then((res) => res.data);
+            .then((res) => res.data)
+            .catch((err) => {
+                this.logger.error(`Error attempting to fetch secrets: ${err}`);
+                return [];
+            });
     }
 
     public async createSecret(createSecretDto: CreateSecretDto) {
         return this._http
             .post('/secrets', createSecretDto)
-            .then((res) => res.data);
+            .then((res) => res.data)
+            .catch((err) => {
+                this.logger.error(`Error attempting to create secret: ${err}`);
+                return null;
+            });
     }
 
     public async deleteSecret(secretId: string) {
         return this._http
             .delete(`/secrets/${secretId}`)
-            .then((res) => res.data);
+            .then((res) => {
+                this.logger.success(
+                    `Secret ${res.data._id} successfully deleted.`
+                );
+                return;
+            })
+            .catch((err) => {
+                this.logger.error(`Error attempting to delete secret: ${err}`);
+                return null;
+            });
     }
 }

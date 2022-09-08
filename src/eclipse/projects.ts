@@ -17,6 +17,12 @@ export class Projects {
 
     public async projectSelection() {
         const projects = await this._api.getProjects();
+
+        if (!projects.length) {
+            this.logger.warning(`No projects found. Try creating one first.`);
+            return;
+        }
+
         const { projectId, action } = await projectSelectionPrompt(projects);
 
         const selectedProject = projects.find((p) => p._id === projectId);
@@ -43,6 +49,12 @@ export class Projects {
 
     private async viewProjectSecrets(project: Project) {
         const secrets = await this.secrets.getSecrets(project);
+
+        if (!secrets) {
+            this.logger.warning(`No secrets found for project ${project.name}`);
+            return;
+        }
+
         const formattedSecrets = objectToFileNotation(secrets);
         this.logger.success(formattedSecrets);
         return;
@@ -50,6 +62,12 @@ export class Projects {
 
     private async printSecrets(project: Project) {
         const secrets = await this.secrets.getSecrets(project);
+
+        if (!secrets) {
+            this.logger.warning(`No secrets found for project ${project.name}`);
+            return;
+        }
+
         await this.envFile.createOrUpdate(secrets);
         this.logger.success('Environment file printed on working directory.');
         return;
