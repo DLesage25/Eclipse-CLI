@@ -1,5 +1,8 @@
 import 'reflect-metadata';
 import os from 'os';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import { Container } from 'inversify';
 import { FileUtil } from './eclipse/utils/fileUtil';
@@ -10,8 +13,6 @@ import { Logger } from './eclipse/utils/logger';
 import { API } from './eclipse/api';
 import { Projects } from './eclipse/projects';
 import { Secrets } from './eclipse/secrets';
-
-require('dotenv').config();
 
 export function index(): Eclipse {
     const container: Container = new Container();
