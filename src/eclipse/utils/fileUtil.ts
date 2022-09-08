@@ -57,7 +57,7 @@ export class FileUtil {
     public async replaceOnFile(update: KeyValues) {
         try {
             const rawData = await this.read();
-            const fileData = fileNotationToObject(rawData);
+            const fileData = fileNotationToObject<KeyValues>(rawData);
 
             const updatedFileData = { ...fileData, ...update };
 
@@ -71,13 +71,13 @@ export class FileUtil {
     }
 }
 
-export const fileNotationToObject = (fileData: string): KeyValues => {
+export const fileNotationToObject = <T>(fileData: string): T => {
     const keyValArray = fileData.split('\n').filter((i) => i !== '');
 
     return keyValArray.reduce((prev, current) => {
         const keyVal = current.split('=');
         return { ...prev, [keyVal[0]]: keyVal[1] };
-    }, {});
+    }, {}) as T;
 };
 
 export const objectToFileNotation = (keyValues: KeyValues) => {

@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import os from 'os';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,6 +12,7 @@ import { Logger } from './eclipse/utils/logger';
 import { API } from './eclipse/api';
 import { Projects } from './eclipse/projects';
 import { Secrets } from './eclipse/secrets';
+import { KeyChain } from './eclipse/keychain';
 
 export function index(): Eclipse {
     const container: Container = new Container();
@@ -24,9 +24,7 @@ export function index(): Eclipse {
     container.bind<API>('API').to(API).inSingletonScope();
     container.bind<Projects>('Projects').to(Projects).inSingletonScope();
     container.bind<Secrets>('Secrets').to(Secrets).inSingletonScope();
-    container
-        .bind<FileUtil>('AuthFile')
-        .toDynamicValue(() => new FileUtil(`${os.homedir()}/.eclipserc`));
+    container.bind<KeyChain>('KeyChain').to(KeyChain).inSingletonScope();
     container
         .bind<FileUtil>('EnvFile')
         .toDynamicValue(() => new FileUtil('./.env'));
