@@ -29,6 +29,11 @@ export class Secrets {
 
     public async getSecrets(project: Project) {
         const secrets = await this._api.getSecrets(project._id);
+
+        if (!secrets.length) {
+            return;
+        }
+
         const secretsWithName = secrets.reduce((prev, secret) => {
             return {
                 ...prev,
@@ -43,8 +48,6 @@ export class Secrets {
         if (!confirm) {
             this.logger.message('Cancelled.');
         }
-        return this._api.deleteSecret(secretId).then((res) => {
-            this.logger.success(`Secret ${res._id} successfully deleted.`);
-        });
+        return this._api.deleteSecret(secretId);
     }
 }

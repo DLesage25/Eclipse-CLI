@@ -3,7 +3,6 @@ import jsonPlugin from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import globals from 'rollup-plugin-node-globals';
-import builtins from 'rollup-plugin-node-builtins';
 import autoExternal from 'rollup-plugin-auto-external';
 import commonjs from '@rollup/plugin-commonjs';
 
