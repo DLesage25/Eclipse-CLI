@@ -4,8 +4,10 @@ import http from 'http';
 import url from 'url';
 import open from 'open';
 import axios from 'axios';
-import { fileNotationToObject, FileUtil } from '../utils/fileUtil';
+import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
+import { KeyChain } from '../keychain';
+import { CoreConfig } from '../types/CoreConfig.type';
 
 const requestUserToken = (codeVerifier: string, code: string) => {
     return axios({
@@ -32,20 +34,25 @@ const requestUserToken = (codeVerifier: string, code: string) => {
 @injectable()
 export class Auth {
     private codeVerifier: string;
+    private coreConfig: CoreConfig | null;
     constructor(
-        @inject('AuthFile') private authFileUtil: FileUtil,
+        @inject('KeyChain') private keyChain: KeyChain,
         @inject('Logger') private logger: Logger
     ) {
         this.codeVerifier = this.createCodeVerifier();
+        this.coreConfig = null;
     }
 
     public async checkIfAuthFlowRequired() {
-        const fileExists = await this.authFileUtil.find();
-        const tokenExpired = fileExists && (await this.checkIfTokenExpired());
+        const rawCoreConfig = await this.keyChain.getKey('eclipse', 'core');
 
-        if (!fileExists || tokenExpired) {
-            return this.initializeAuthFlow();
-        }
+        if (!rawCoreConfig) return this.initializeAuthFlow();
+
+        this.coreConfig = fileNotationToObject<CoreConfig>(rawCoreConfig);
+
+        const tokenExpired = await this.checkIfTokenExpired();
+
+        if (tokenExpired) return this.initializeAuthFlow();
 
         this.logger.success('Session restored. Welcome back!');
 
@@ -63,21 +70,19 @@ export class Auth {
         return;
     }
 
-    public async getAccessToken() {
-        const rawData = await this.authFileUtil.read();
-        const fileData = fileNotationToObject(rawData);
+    public async getConfig(): Promise<CoreConfig | null> {
+        const rawData = await this.keyChain.getKey('eclipse', 'core');
 
-        return fileData.access_token;
+        if (!rawData) return null;
+
+        const config = fileNotationToObject<CoreConfig>(rawData);
+        return config;
     }
 
     private async checkIfTokenExpired() {
-        const rawFileData = await this.authFileUtil.read();
-        const fileData = fileNotationToObject(rawFileData);
+        const { expiration_date } = this.coreConfig as CoreConfig;
 
-        if (
-            fileData.expiration_date &&
-            Number(fileData.expiration_date) <= Date.now()
-        ) {
+        if (expiration_date && Number(expiration_date) <= Date.now()) {
             return true;
         }
         return false;
@@ -108,7 +113,7 @@ export class Auth {
             .createServer(
                 this.handleAuthResponse(
                     this.codeVerifier,
-                    this.authFileUtil,
+                    this.keyChain,
                     this.logger
                 )
             )
@@ -148,7 +153,7 @@ export class Auth {
     }
 
     private handleAuthResponse =
-        (codeVerifier: string, authFileUtil: FileUtil, logger: Logger) =>
+        (codeVerifier: string, keychain: KeyChain, logger: Logger) =>
         async (req: http.IncomingMessage, res: http.ServerResponse) => {
             if (!req.url) return;
 
@@ -188,7 +193,12 @@ export class Auth {
                     expires_in * 1000
                 ).toString();
 
-                authFileUtil.createOrUpdate({ access_token, expiration_date });
+                const fileFormat = objectToFileNotation({
+                    access_token,
+                    expiration_date,
+                });
+
+                keychain.setKey('eclipse', 'core', fileFormat);
 
                 return res.end();
             } catch (err) {

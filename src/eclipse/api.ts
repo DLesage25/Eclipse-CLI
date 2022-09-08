@@ -1,16 +1,16 @@
 import axios, { Axios } from 'axios';
 import { inject, injectable } from 'inversify';
+import { Auth } from './auth/auth';
 import { CreateSecretDto } from './dtos/createSecret.dto';
 import { Project } from './types/Project.type';
 import { RevealedSecret } from './types/Secret.type';
-import { fileNotationToObject, FileUtil } from './utils/fileUtil';
 import { Logger } from './utils/logger';
 
 @injectable()
 export class API {
     private _http: Axios;
     constructor(
-        @inject('AuthFile') private authFileUtil: FileUtil,
+        @inject('Auth') private auth: Auth,
         @inject('Logger') private logger: Logger
     ) {
         this._http = axios.create({
@@ -22,8 +22,11 @@ export class API {
     }
 
     public async Initialize() {
-        const rawData = await this.authFileUtil.read();
-        const { access_token } = fileNotationToObject(rawData);
+        const config = await this.auth.getConfig();
+
+        if (!config) return;
+
+        const { access_token } = config;
 
         this._http.interceptors.request.use((config) => {
             if (!config.headers) config.headers = {};
