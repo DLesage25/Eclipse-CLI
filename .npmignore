@@ -7,3 +7,4 @@ CONTRIBUTING.md
 package-lock.json
 tsconfig.json
 tslint.json
+.env
