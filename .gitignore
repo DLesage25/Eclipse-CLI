@@ -29,3 +29,5 @@ service-worker.js
 !*.index.bundle.js
 *.data
 lib/
+
+.DS_Store
