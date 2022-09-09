@@ -11,8 +11,6 @@
         "start": "npm run build && npm run global",
         "build": " rm -rf ./lib && npx rollup -c",
         "global": "sudo npm i -g && eclipse",
-        "link-upstream": "git remote add upstream https://github.com/dlesage25/eclipse-cli.git",
-        "sync": "git fetch origin && git checkout master && git pull && git checkout <your-branch> && git merge master && git push",
         "reset": "rm -rf ./node_modules ./package-lock.json ./lib && npm install",
         "lint": "npx eslint ."
     },
