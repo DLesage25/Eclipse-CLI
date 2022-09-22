@@ -1,5 +1,4 @@
 import inquirer from 'inquirer';
-import { Project } from '../types/Project.type';
 
 const projectActions = [
     {
@@ -22,31 +21,14 @@ const projectActions = [
         value: 'print',
         short: 'Print secrets to env file',
     },
-    {
-        name: 'Initialize a config file in this directory.',
-        value: 'createConfig',
-        short: 'Create config file',
-    },
 ];
 
-export default function projectSelectionPrompt(projects: Project[]) {
-    const projectChoices = projects.map((p) => ({
-        name: `${p.name} - ${p.createdAt}`,
-        value: p._id,
-        short: p.name,
-    }));
-
+export default function singleProjectActionPrompt(projectName: string) {
     return inquirer.prompt([
         {
             type: 'list',
-            name: 'projectId',
-            message: 'Please select a project.',
-            choices: projectChoices,
-        },
-        {
-            type: 'list',
             name: 'action',
-            message: 'What would you like to do?',
+            message: `Looks like you are in the project ${projectName} directory. What would you like to do?`,
             choices: projectActions,
         },
     ]);

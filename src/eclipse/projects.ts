@@ -1,6 +1,8 @@
 import { inject, injectable } from 'inversify';
 import { API } from './api';
+import { ProjectConfig } from './projectConfig';
 import projectSelectionPrompt from './prompts/projectSelection.prompt';
+import singleProjectActionPrompt from './prompts/singleProjectAction.prompt';
 import { Secrets } from './secrets';
 import { Project } from './types/Project.type';
 import { FileUtil, objectToFileNotation } from './utils/fileUtil';
@@ -12,8 +14,27 @@ export class Projects {
         @inject('API') private _api: API,
         @inject('Logger') private logger: Logger,
         @inject('Secrets') private secrets: Secrets,
-        @inject('EnvFile') private envFile: FileUtil
+        @inject('EnvFile') private envFile: FileUtil,
+        @inject('ProjectConfig') private projectConfig: ProjectConfig
     ) {}
+
+    private projectActions(action: string, project: Project) {
+        switch (action) {
+            case 'view':
+                return this.viewProjectSecrets(project);
+            case 'add':
+                return this.secrets.addSecret(project);
+            case 'remove':
+                return this.secrets.removeSecret(project);
+            case 'print':
+                return this.printSecrets(project);
+            case 'createConfig':
+                return this.projectConfig.createConfigFile(project._id);
+            default:
+                this.logger.warning('Command not recognized');
+                return;
+        }
+    }
 
     public async projectSelection() {
         const projects = await this._api.getProjects();
@@ -32,19 +53,27 @@ export class Projects {
             return;
         }
 
-        switch (action) {
-            case 'view':
-                return this.viewProjectSecrets(selectedProject);
-            case 'add':
-                return this.secrets.addSecret(selectedProject);
-            case 'remove':
-                return this.secrets.removeSecret(selectedProject);
-            case 'print':
-                return this.printSecrets(selectedProject);
-            default:
-                this.logger.warning('Command not recognized');
-                return;
+        return this.projectActions(action, selectedProject);
+    }
+
+    public async getProject(projectId: string) {
+        const [project] = await this._api.getProjects(projectId);
+        return project;
+    }
+
+    public async promptSingleProjectActions(projectId: string) {
+        const project = await this.getProject(projectId);
+
+        if (!project) {
+            this.logger.error(
+                'It looks like you do not have access to the project tagged in this directory.'
+            );
+            return;
         }
+
+        const { action } = await singleProjectActionPrompt(project.name);
+
+        return this.projectActions(action, project);
     }
 
     private async viewProjectSecrets(project: Project) {
@@ -71,5 +100,26 @@ export class Projects {
         await this.envFile.createOrUpdate(secrets);
         this.logger.success('Environment file printed on working directory.');
         return;
+    }
+
+    public async checkIfOnProjectDirectory() {
+        const onProjectDirectory = await this.projectConfig.checkIfExists();
+
+        if (!onProjectDirectory) {
+            return false;
+        }
+
+        const configData = await this.projectConfig.readConfigFile();
+
+        if (!configData['PROJECT']) {
+            this.logger.error(
+                'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
+            );
+            return true;
+        }
+
+        await this.promptSingleProjectActions(configData['PROJECT']);
+
+        return true;
     }
 }
