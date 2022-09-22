@@ -9,7 +9,10 @@ export class Options {
         return program
             .version(packageJson.version)
             .description(cyan('Inject environment variables on runtime'))
-            .option('--debug', 'Show debug info')
+            .option(
+                '--all',
+                'Inject environment variables into the execution context (make sure you are inside a project folder with an .eclipserc on it).'
+            )
             .outputHelp();
     }
 }
