@@ -23,12 +23,12 @@ const projectActions = [
     },
 ];
 
-export default function singleProjectActionPrompt() {
+export default function singleProjectActionPrompt(projectName: string) {
     return inquirer.prompt([
         {
             type: 'list',
             name: 'action',
-            message: 'What would you like to do?',
+            message: `Looks like you are in the project ${projectName} directory. What would you like to do?`,
             choices: projectActions,
         },
     ]);

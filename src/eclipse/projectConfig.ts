@@ -1,5 +1,4 @@
 import { inject, injectable } from 'inversify';
-import { Projects } from './projects';
 import { FileUtil } from './utils/fileUtil';
 import { Logger } from './utils/logger';
 
@@ -7,8 +6,7 @@ import { Logger } from './utils/logger';
 export class ProjectConfig {
     constructor(
         @inject('Logger') private logger: Logger,
-        @inject('ConfigFile') private configFile: FileUtil,
-        @inject('Projects') private projects: Projects
+        @inject('ConfigFile') private configFile: FileUtil
     ) {}
 
     public async createConfigFile(projectId: string) {
@@ -22,26 +20,5 @@ export class ProjectConfig {
 
     public async checkIfExists() {
         return this.configFile.find();
-    }
-
-    public async checkIfOnProjectDirectory() {
-        const onProjectDirectory = await this.checkIfExists();
-
-        if (!onProjectDirectory) {
-            return false;
-        }
-
-        const configData = await this.readConfigFile();
-
-        if (!configData['PROJECT']) {
-            this.logger.error(
-                'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
-            );
-            return true;
-        }
-
-        await this.projects.promptSingleProjectActions(configData['PROJECT']);
-
-        return true;
     }
 }

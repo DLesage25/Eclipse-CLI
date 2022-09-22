@@ -82,7 +82,7 @@ export class Eclipse {
         this.logger.verticalSeparator();
 
         const isInProjectDirectory =
-            await this.projectConfig.checkIfOnProjectDirectory();
+            await this.projects.checkIfOnProjectDirectory();
 
         if (!isInProjectDirectory) await this.projects.projectSelection();
 

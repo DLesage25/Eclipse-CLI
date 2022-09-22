@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { API } from './api';
+import { ProjectConfig } from './projectConfig';
 import projectSelectionPrompt from './prompts/projectSelection.prompt';
 import singleProjectActionPrompt from './prompts/singleProjectAction.prompt';
 import { Secrets } from './secrets';
@@ -13,7 +14,8 @@ export class Projects {
         @inject('API') private _api: API,
         @inject('Logger') private logger: Logger,
         @inject('Secrets') private secrets: Secrets,
-        @inject('EnvFile') private envFile: FileUtil
+        @inject('EnvFile') private envFile: FileUtil,
+        @inject('ProjectConfig') private projectConfig: ProjectConfig
     ) {}
 
     private projectActions(action: string, project: Project) {
@@ -26,6 +28,8 @@ export class Projects {
                 return this.secrets.removeSecret(project);
             case 'print':
                 return this.printSecrets(project);
+            case 'createConfig':
+                return this.projectConfig.createConfigFile(project._id);
             default:
                 this.logger.warning('Command not recognized');
                 return;
@@ -67,11 +71,7 @@ export class Projects {
             return;
         }
 
-        this.logger.message(
-            `This directory is tagged for project ${project.name}`
-        );
-
-        const { action } = await singleProjectActionPrompt();
+        const { action } = await singleProjectActionPrompt(project.name);
 
         return this.projectActions(action, project);
     }
@@ -100,5 +100,26 @@ export class Projects {
         await this.envFile.createOrUpdate(secrets);
         this.logger.success('Environment file printed on working directory.');
         return;
+    }
+
+    public async checkIfOnProjectDirectory() {
+        const onProjectDirectory = await this.projectConfig.checkIfExists();
+
+        if (!onProjectDirectory) {
+            return false;
+        }
+
+        const configData = await this.projectConfig.readConfigFile();
+
+        if (!configData['PROJECT']) {
+            this.logger.error(
+                'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
+            );
+            return true;
+        }
+
+        await this.promptSingleProjectActions(configData['PROJECT']);
+
+        return true;
     }
 }

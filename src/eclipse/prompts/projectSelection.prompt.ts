@@ -22,6 +22,11 @@ const projectActions = [
         value: 'print',
         short: 'Print secrets to env file',
     },
+    {
+        name: 'Initialize a config file in this directory.',
+        value: 'createConfig',
+        short: 'Create config file',
+    },
 ];
 
 export default function projectSelectionPrompt(projects: Project[]) {
