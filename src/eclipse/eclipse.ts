@@ -8,6 +8,7 @@ import { Auth } from './auth/auth';
 import { Logger } from './utils/logger';
 import { API } from './api';
 import { Projects } from './projects';
+import { ProjectConfig } from './projectConfig';
 
 @injectable()
 export class Eclipse {
@@ -18,7 +19,8 @@ export class Eclipse {
         @inject('Auth') private auth: Auth,
         @inject('Logger') private logger: Logger,
         @inject('API') private _api: API,
-        @inject('Projects') private projects: Projects
+        @inject('Projects') private projects: Projects,
+        @inject('ProjectConfig') private projectConfig: ProjectConfig
     ) {
         try {
             this.execute()
@@ -79,7 +81,10 @@ export class Eclipse {
 
         this.logger.verticalSeparator();
 
-        await this.projects.projectSelection();
+        const isInProjectDirectory =
+            await this.projectConfig.checkIfOnProjectDirectory();
+
+        if (!isInProjectDirectory) await this.projects.projectSelection();
 
         return true;
     }

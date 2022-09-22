@@ -43,9 +43,17 @@ export class API {
         return this._http.get('/users/').then((res) => res.data);
     }
 
-    public async getProjects(): Promise<Project[]> {
+    public async getProjects(projectId?: string): Promise<Project[]> {
+        const opts = projectId
+            ? {
+                  params: {
+                      projectId,
+                  },
+              }
+            : undefined;
+
         return this._http
-            .get('/projects/')
+            .get('/projects/', opts)
             .then((res) => {
                 return typeof res.data === 'string'
                     ? JSON.parse(res.data)

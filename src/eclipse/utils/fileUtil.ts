@@ -54,6 +54,16 @@ export class FileUtil {
         }
     }
 
+    public async readIntoObject<T>() {
+        try {
+            const raw = await this.read();
+            return fileNotationToObject<T>(raw);
+        } catch (e) {
+            console.error(`Error reading file into object ${e}`);
+            return {};
+        }
+    }
+
     public async replaceOnFile(update: KeyValues) {
         try {
             const rawData = await this.read();
