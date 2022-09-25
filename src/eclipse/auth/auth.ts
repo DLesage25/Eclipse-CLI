@@ -12,14 +12,14 @@ import { CoreConfig } from '../types/CoreConfig.type';
 const requestUserToken = (codeVerifier: string, code: string) => {
     return axios({
         method: 'POST',
-        url: `${process.env.AUTH_DOMAIN}/oauth/token`,
+        url: `${process.env.ECLIPSE_AUTH_DOMAIN}/oauth/token`,
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: new URLSearchParams({
             grant_type: 'authorization_code',
-            client_id: process.env.AUTH_CLIENT_ID as string,
+            client_id: process.env.ECLIPSE_AUTH_CLIENT_ID as string,
             code_verifier: codeVerifier,
             code,
-            redirect_uri: process.env.AUTH_CALLBACK_URL as string,
+            redirect_uri: process.env.ECLIPSE_AUTH_CALLBACK_URL as string,
         }),
     })
         .then((res) => {
@@ -117,10 +117,10 @@ export class Auth {
                     this.logger
                 )
             )
-            .listen(process.env.AUTH_SERVER_PORT, (err?: Error) => {
+            .listen(process.env.ECLIPSE_AUTH_SERVER_PORT, (err?: Error) => {
                 if (err) {
                     this.logger.error(
-                        `Unable to start an HTTP server on port ${process.env.AUTH_SERVER_PORT}: ${err}`
+                        `Unable to start an HTTP server on port ${process.env.ECLIPSE_AUTH_SERVER_PORT}: ${err}`
                     );
                 }
             });
@@ -128,14 +128,14 @@ export class Auth {
 
     private constructAuthUrl(codeChallenge: string, state: string): string {
         return [
-            `${process.env.AUTH_DOMAIN}/authorize`,
+            `${process.env.ECLIPSE_AUTH_DOMAIN}/authorize`,
             `?response_type=code`,
             `&code_challenge_method=S256`,
             `&code_challenge=${codeChallenge}`,
-            `&client_id=${process.env.AUTH_CLIENT_ID}`,
-            `&redirect_uri=${process.env.AUTH_CALLBACK_URL}`,
+            `&client_id=${process.env.ECLIPSE_AUTH_CLIENT_ID}`,
+            `&redirect_uri=${process.env.ECLIPSE_AUTH_CALLBACK_URL}`,
             `&scope=email`,
-            `&audience=${process.env.AUTH_TARGET_AUDIENCE}`,
+            `&audience=${process.env.ECLIPSE_AUTH_TARGET_AUDIENCE}`,
             `&state=${state}`,
         ].join('');
     }
