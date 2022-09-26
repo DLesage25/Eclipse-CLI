@@ -56,7 +56,7 @@ export class Auth {
 
         this.logger.success('Session restored. Welcome back!');
 
-        return;
+        return false;
     }
 
     public async initializeAuthFlow() {
@@ -65,9 +65,11 @@ export class Auth {
         this.createAuthServer();
         await this.openAuthPage(authUrl);
 
-        this.logger.success('You are now logged in!');
+        this.logger.success(
+            'You are now logged in! Please run eclipse again in your terminal.'
+        );
 
-        return;
+        return true;
     }
 
     public async getConfig(): Promise<CoreConfig | null> {
@@ -205,4 +207,9 @@ export class Auth {
                 logger.error(`Error attempting to save access token: ${err}`);
             }
         };
+
+    public async logout() {
+        await this.keyChain.deleteKey('eclipse', 'core');
+        this.logger.message("You've been logged out successfully.");
+    }
 }

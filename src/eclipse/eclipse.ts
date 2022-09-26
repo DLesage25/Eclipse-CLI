@@ -8,7 +8,7 @@ import { Auth } from './auth/auth';
 import { Logger } from './utils/logger';
 import { API } from './api';
 import { Projects } from './projects';
-import { ProjectConfig } from './projectConfig';
+import mainMenuPrompt from './prompts/mainMenu.prompt';
 
 @injectable()
 export class Eclipse {
@@ -19,8 +19,7 @@ export class Eclipse {
         @inject('Auth') private auth: Auth,
         @inject('Logger') private logger: Logger,
         @inject('API') private _api: API,
-        @inject('Projects') private projects: Projects,
-        @inject('ProjectConfig') private projectConfig: ProjectConfig
+        @inject('Projects') private projects: Projects
     ) {
         try {
             this.execute()
@@ -65,7 +64,10 @@ export class Eclipse {
 
         const { inject, _: postArguments } = argv;
 
-        await this.auth.checkIfAuthFlowRequired();
+        const requiresRestart = await this.auth.checkIfAuthFlowRequired();
+
+        if (requiresRestart) return true;
+
         await this._api.Initialize();
 
         this.logger.verticalSeparator();
@@ -83,8 +85,16 @@ export class Eclipse {
         }
 
         if (isInProjectDirectory) await this.projects.projectDirectoryMenu();
-        if (!isInProjectDirectory) await this.projects.projectSelection();
+        if (!isInProjectDirectory) await this.showTopLevelMenu();
 
+        return true;
+    }
+
+    private async showTopLevelMenu() {
+        const { action } = await mainMenuPrompt();
+
+        if (action === 'view') await this.projects.projectSelection();
+        if (action === 'logout') await this.auth.logout();
         return true;
     }
 
