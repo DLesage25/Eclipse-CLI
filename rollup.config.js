@@ -27,18 +27,20 @@ export default {
         tsConfig({ module: 'ESNext' }),
         jsonPlugin(),
         replace({
-            'process.env.AUTH_SERVER_PORT': JSON.stringify(
-                process.env.AUTH_SERVER_PORT
+            'process.env.ECLIPSE_AUTH_SERVER_PORT': JSON.stringify(
+                process.env.ECLIPSE_AUTH_SERVER_PORT
             ),
-            'process.env.AUTH_CLIENT_ID': JSON.stringify(
-                process.env.AUTH_CLIENT_ID
+            'process.env.ECLIPSE_AUTH_CLIENT_ID': JSON.stringify(
+                process.env.ECLIPSE_AUTH_CLIENT_ID
             ),
-            'process.env.AUTH_DOMAIN': JSON.stringify(process.env.AUTH_DOMAIN),
-            'process.env.AUTH_CALLBACK_URL': JSON.stringify(
-                process.env.AUTH_CALLBACK_URL
+            'process.env.ECLIPSE_AUTH_DOMAIN': JSON.stringify(
+                process.env.ECLIPSE_AUTH_DOMAIN
             ),
-            'process.env.AUTH_TARGET_AUDIENCE': JSON.stringify(
-                process.env.AUTH_TARGET_AUDIENCE
+            'process.env.ECLIPSE_AUTH_CALLBACK_URL': JSON.stringify(
+                process.env.ECLIPSE_AUTH_CALLBACK_URL
+            ),
+            'process.env.ECLIPSE_AUTH_TARGET_AUDIENCE': JSON.stringify(
+                process.env.ECLIPSE_AUTH_TARGET_AUDIENCE
             ),
             'process.env.ECLIPSE_API_URL': JSON.stringify(
                 process.env.ECLIPSE_API_URL

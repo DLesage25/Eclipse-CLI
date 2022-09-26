@@ -14,6 +14,7 @@ import { Projects } from './eclipse/projects';
 import { Secrets } from './eclipse/secrets';
 import { KeyChain } from './eclipse/keychain';
 import { ProjectConfig } from './eclipse/projectConfig';
+import { Cmd } from './eclipse/cmd';
 
 export function index(): Eclipse {
     const container: Container = new Container();
@@ -26,6 +27,7 @@ export function index(): Eclipse {
     container.bind<Projects>('Projects').to(Projects).inSingletonScope();
     container.bind<Secrets>('Secrets').to(Secrets).inSingletonScope();
     container.bind<KeyChain>('KeyChain').to(KeyChain).inSingletonScope();
+    container.bind<Cmd>('CMD').to(Cmd).inSingletonScope();
     container
         .bind<ProjectConfig>('ProjectConfig')
         .to(ProjectConfig)

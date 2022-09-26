@@ -34,12 +34,15 @@ export class Secrets {
             return;
         }
 
-        const secretsWithName = secrets.reduce((prev, secret) => {
-            return {
-                ...prev,
-                [secret.name]: secret.value,
-            };
-        }, {});
+        const secretsWithName: { [key: string]: string } = secrets.reduce(
+            (prev, secret) => {
+                return {
+                    ...prev,
+                    [secret.name]: secret.value,
+                };
+            },
+            {}
+        );
         return secretsWithName;
     }
 

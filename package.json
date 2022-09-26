@@ -44,7 +44,7 @@
         "open": "^8.4.0",
         "prompts": "^2.0.1",
         "reflect-metadata": "^0.1.13",
-        "tslib": "1.9.3"
+        "tslib": "^2.4.0"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^22.0.2",
