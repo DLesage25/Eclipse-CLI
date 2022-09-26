@@ -8,7 +8,7 @@ kleur.enabled = require('color-support').level;
 @injectable()
 export class Logger {
     public verticalSeparator() {
-        console.log('\n\n');
+        console.log('\n =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+ \n');
     }
 
     public message(msg: string) {
