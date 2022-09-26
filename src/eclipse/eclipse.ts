@@ -47,7 +47,8 @@ export class Eclipse {
         console.clear();
         this.showIntroLog();
 
-        const argv = minimist(process.argv.slice(2), { '--': true });
+        const argv = minimist(process.argv.slice(2));
+
         this.suppressError = argv.suppressError;
 
         const showVersion: boolean = argv.v || argv.version;
@@ -62,19 +63,7 @@ export class Eclipse {
             return true;
         }
 
-        let projectInput: string = argv.p || argv.project;
-
-        if (projectInput === undefined && argv._.length === 0) {
-            projectInput = '.';
-        }
-
-        //TODO this will never run because of the statement above.
-        if (projectInput === undefined && !showHelp && !showVersion) {
-            this.logger.error(
-                'Unknown command, run eclipse -h or eclipse --help for a list of commands.'
-            );
-            return false;
-        }
+        const { inject, _: postArguments } = argv;
 
         await this.auth.checkIfAuthFlowRequired();
         await this._api.Initialize();
@@ -84,6 +73,16 @@ export class Eclipse {
         const isInProjectDirectory =
             await this.projects.checkIfOnProjectDirectory();
 
+        if (isInProjectDirectory && inject) {
+            const [coreProcess, ...processArgs] = postArguments;
+            await this.projects.injectLocalProjectSecrets(
+                coreProcess,
+                processArgs
+            );
+            return true;
+        }
+
+        if (isInProjectDirectory) await this.projects.projectDirectoryMenu();
         if (!isInProjectDirectory) await this.projects.projectSelection();
 
         return true;

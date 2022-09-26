@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { API } from './api';
+import { Cmd } from './cmd';
 import { ProjectConfig } from './projectConfig';
 import projectSelectionPrompt from './prompts/projectSelection.prompt';
 import singleProjectActionPrompt from './prompts/singleProjectAction.prompt';
@@ -15,7 +16,8 @@ export class Projects {
         @inject('Logger') private logger: Logger,
         @inject('Secrets') private secrets: Secrets,
         @inject('EnvFile') private envFile: FileUtil,
-        @inject('ProjectConfig') private projectConfig: ProjectConfig
+        @inject('ProjectConfig') private projectConfig: ProjectConfig,
+        @inject('CMD') private cmd: Cmd
     ) {}
 
     private projectActions(action: string, project: Project) {
@@ -56,12 +58,12 @@ export class Projects {
         return this.projectActions(action, selectedProject);
     }
 
-    public async getProject(projectId: string) {
+    private async getProject(projectId: string) {
         const [project] = await this._api.getProjects(projectId);
         return project;
     }
 
-    public async promptSingleProjectActions(projectId: string) {
+    private async promptSingleProjectActions(projectId: string) {
         const project = await this.getProject(projectId);
 
         if (!project) {
@@ -102,7 +104,7 @@ export class Projects {
         return;
     }
 
-    public async checkIfOnProjectDirectory() {
+    public async projectDirectoryMenu() {
         const onProjectDirectory = await this.projectConfig.checkIfExists();
 
         if (!onProjectDirectory) {
@@ -121,5 +123,39 @@ export class Projects {
         await this.promptSingleProjectActions(configData['PROJECT']);
 
         return true;
+    }
+
+    public async checkIfOnProjectDirectory() {
+        return this.projectConfig.checkIfExists();
+    }
+
+    public async getCurrentProjectSecrets() {
+        const configData = await this.projectConfig.readConfigFile();
+
+        if (!configData['PROJECT']) {
+            this.logger.error(
+                'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
+            );
+            return;
+        }
+
+        const project = await this.getProject(configData['PROJECT']);
+        const secrets = await this.secrets.getSecrets(project);
+
+        if (!secrets) {
+            this.logger.warning(`No secrets found for project ${project.name}`);
+            return;
+        }
+
+        return secrets;
+    }
+
+    public async injectLocalProjectSecrets(
+        coreProcess: string,
+        processArgs: string[]
+    ) {
+        const secrets = await this.getCurrentProjectSecrets();
+        if (!secrets) return;
+        return this.cmd.initialize(coreProcess, processArgs, secrets);
     }
 }
