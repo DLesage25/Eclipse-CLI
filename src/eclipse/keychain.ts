@@ -13,4 +13,8 @@ export class KeyChain {
     public async setKey(service: string, account: string, password: string) {
         return keytar.setPassword(service, account, password);
     }
+
+    public deleteKey(service: string, account: string) {
+        return keytar.deletePassword(service, account);
+    }
 }
