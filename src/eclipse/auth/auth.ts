@@ -7,7 +7,7 @@ import axios from 'axios';
 import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
 import { KeyChain } from '../keychain';
-import { CoreConfig } from '../types/CoreConfig.type';
+import { AuthConfig } from '../types/AuthConfig.type';
 
 const requestUserToken = (codeVerifier: string, code: string) => {
     return axios({
@@ -34,21 +34,21 @@ const requestUserToken = (codeVerifier: string, code: string) => {
 @injectable()
 export class Auth {
     private codeVerifier: string;
-    private coreConfig: CoreConfig | null;
+    private authConfig: AuthConfig | null;
     constructor(
         @inject('KeyChain') private keyChain: KeyChain,
         @inject('Logger') private logger: Logger
     ) {
         this.codeVerifier = this.createCodeVerifier();
-        this.coreConfig = null;
+        this.authConfig = null;
     }
 
     public async checkIfAuthFlowRequired() {
-        const rawCoreConfig = await this.keyChain.getKey('eclipse', 'core');
+        const rawAuthConfig = await this.keyChain.getKey('eclipse', 'auth');
 
-        if (!rawCoreConfig) return this.initializeAuthFlow();
+        if (!rawAuthConfig) return this.initializeAuthFlow();
 
-        this.coreConfig = fileNotationToObject<CoreConfig>(rawCoreConfig);
+        this.authConfig = fileNotationToObject<AuthConfig>(rawAuthConfig);
 
         const tokenExpired = await this.checkIfTokenExpired();
 
@@ -72,17 +72,17 @@ export class Auth {
         return true;
     }
 
-    public async getConfig(): Promise<CoreConfig | null> {
-        const rawData = await this.keyChain.getKey('eclipse', 'core');
+    public async getConfig(): Promise<AuthConfig | null> {
+        const rawData = await this.keyChain.getKey('eclipse', 'auth');
 
         if (!rawData) return null;
 
-        const config = fileNotationToObject<CoreConfig>(rawData);
+        const config = fileNotationToObject<AuthConfig>(rawData);
         return config;
     }
 
     private async checkIfTokenExpired() {
-        const { expiration_date } = this.coreConfig as CoreConfig;
+        const { expiration_date } = this.authConfig as AuthConfig;
 
         if (expiration_date && Number(expiration_date) <= Date.now()) {
             return true;
@@ -168,6 +168,7 @@ export class Auth {
             <html>
             <body>
                 <h1>LOGIN SUCCEEDED</h1>
+                <p>You can close this browser window and go back to your terminal.</p>
             </body>
             </html>
             `);
@@ -200,7 +201,7 @@ export class Auth {
                     expiration_date,
                 });
 
-                keychain.setKey('eclipse', 'core', fileFormat);
+                keychain.setKey('eclipse', 'auth', fileFormat);
 
                 return res.end();
             } catch (err) {
@@ -209,7 +210,7 @@ export class Auth {
         };
 
     public async logout() {
-        await this.keyChain.deleteKey('eclipse', 'core');
+        await this.keyChain.deleteKey('eclipse', 'auth');
         this.logger.message("You've been logged out successfully.");
     }
 }
