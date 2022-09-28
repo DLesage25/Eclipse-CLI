@@ -22,6 +22,10 @@ export class CoreConfigModule {
         return this.keychain.setKey('eclipse', 'core', fileFormat);
     }
 
+    public delete() {
+        return this.keychain.deleteKey('eclipse', 'core');
+    }
+
     public async initialize() {
         const {
             ECLIPSE_AUTH_SERVER_PORT,

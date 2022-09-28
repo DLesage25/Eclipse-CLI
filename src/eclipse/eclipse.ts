@@ -68,7 +68,9 @@ export class Eclipse {
 
         if (!isConfigured) return true;
 
-        const { inject, _: postArguments } = argv;
+        const { inject, init, _: postArguments } = argv;
+
+        if (init) return this.restartCoreConfig();
 
         const requiresRestart = await this.auth.checkIfAuthFlowRequired();
 
@@ -112,6 +114,17 @@ export class Eclipse {
         );
 
         return false;
+    }
+
+    private async restartCoreConfig() {
+        await this.coreConfig.delete();
+        await this.coreConfig.initialize();
+
+        this.logger.success(
+            'Eclipse has been configured successfully. Please run Eclipse again and log in. :)'
+        );
+
+        return true;
     }
 
     private async showTopLevelMenu() {
