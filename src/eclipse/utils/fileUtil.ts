@@ -90,7 +90,7 @@ export const fileNotationToObject = <T>(fileData: string): T => {
     }, {}) as T;
 };
 
-export const objectToFileNotation = (keyValues: KeyValues) => {
+export const objectToFileNotation = (keyValues: object) => {
     const kv = { ...keyValues };
     let formattedString = '';
 
