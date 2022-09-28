@@ -1,6 +1,5 @@
 import tsConfig from '@rollup/plugin-typescript';
 import jsonPlugin from '@rollup/plugin-json';
-import replace from '@rollup/plugin-replace';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import globals from 'rollup-plugin-node-globals';
 import autoExternal from 'rollup-plugin-auto-external';
@@ -26,27 +25,6 @@ export default {
         }),
         tsConfig({ module: 'ESNext' }),
         jsonPlugin(),
-        replace({
-            'process.env.ECLIPSE_AUTH_SERVER_PORT': JSON.stringify(
-                process.env.ECLIPSE_AUTH_SERVER_PORT
-            ),
-            'process.env.ECLIPSE_AUTH_CLIENT_ID': JSON.stringify(
-                process.env.ECLIPSE_AUTH_CLIENT_ID
-            ),
-            'process.env.ECLIPSE_AUTH_DOMAIN': JSON.stringify(
-                process.env.ECLIPSE_AUTH_DOMAIN
-            ),
-            'process.env.ECLIPSE_AUTH_CALLBACK_URL': JSON.stringify(
-                process.env.ECLIPSE_AUTH_CALLBACK_URL
-            ),
-            'process.env.ECLIPSE_AUTH_TARGET_AUDIENCE': JSON.stringify(
-                process.env.ECLIPSE_AUTH_TARGET_AUDIENCE
-            ),
-            'process.env.ECLIPSE_API_URL': JSON.stringify(
-                process.env.ECLIPSE_API_URL
-            ),
-            preventAssignment: true,
-        }),
         autoExternal({
             builtins: false,
             dependencies: true,
