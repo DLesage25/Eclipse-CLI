@@ -1,6 +1,7 @@
 import axios, { Axios } from 'axios';
 import { inject, injectable } from 'inversify';
 import { Auth } from './auth/auth';
+import { CoreConfigModule } from './coreConfig';
 import { CreateSecretDto } from './dtos/createSecret.dto';
 import { Project } from './types/Project.type';
 import { RevealedSecret } from './types/Secret.type';
@@ -11,10 +12,11 @@ export class API {
     private _http: Axios;
     constructor(
         @inject('Auth') private auth: Auth,
-        @inject('Logger') private logger: Logger
+        @inject('Logger') private logger: Logger,
+        @inject('CoreConfig') private coreConfig: CoreConfigModule
     ) {
         this._http = axios.create({
-            baseURL: process.env.ECLIPSE_API_URL,
+            baseURL: '',
             headers: {
                 Authorization: '',
             },
@@ -23,13 +25,18 @@ export class API {
 
     public async Initialize() {
         const config = await this.auth.getConfig();
+        const coreConfig = await this.coreConfig.get();
 
-        if (!config) {
-            this.logger.error('Could not initialize API. Config not found');
+        if (!config || !coreConfig) {
+            this.logger.error(
+                'Could not initialize API. Auth or core config not found'
+            );
             return;
         }
 
         const { access_token } = config;
+
+        this._http.defaults.baseURL = coreConfig.ECLIPSE_API_URL;
 
         this._http.interceptors.request.use((config) => {
             if (!config.headers) config.headers = {};

@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
-import http from 'http';
+import http, { Server } from 'http';
 import url from 'url';
 import open from 'open';
 import axios from 'axios';
@@ -8,18 +8,23 @@ import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
 import { KeyChain } from '../keychain';
 import { AuthConfig } from '../types/AuthConfig.type';
+import { CoreConfigModule } from '../coreConfig';
 
-const requestUserToken = (codeVerifier: string, code: string) => {
+const requestUserToken = (
+    codeVerifier: string,
+    code: string,
+    serverConfig: ServerConfig
+) => {
     return axios({
         method: 'POST',
-        url: `${process.env.ECLIPSE_AUTH_DOMAIN}/oauth/token`,
+        url: `${serverConfig.ECLIPSE_AUTH_DOMAIN}/oauth/token`,
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: new URLSearchParams({
             grant_type: 'authorization_code',
-            client_id: process.env.ECLIPSE_AUTH_CLIENT_ID as string,
+            client_id: serverConfig.ECLIPSE_AUTH_CLIENT_ID,
             code_verifier: codeVerifier,
             code,
-            redirect_uri: process.env.ECLIPSE_AUTH_CALLBACK_URL as string,
+            redirect_uri: serverConfig.ECLIPSE_AUTH_CALLBACK_URL,
         }),
     })
         .then((res) => {
@@ -31,19 +36,34 @@ const requestUserToken = (codeVerifier: string, code: string) => {
         });
 };
 
+interface ServerConfig {
+    ECLIPSE_AUTH_DOMAIN: string;
+    ECLIPSE_AUTH_CLIENT_ID: string;
+    ECLIPSE_AUTH_CALLBACK_URL: string;
+    ECLIPSE_AUTH_SERVER_PORT: number;
+}
+
+interface AuthUrlConfig {
+    ECLIPSE_AUTH_TARGET_AUDIENCE: string;
+    ECLIPSE_AUTH_CLIENT_ID: string;
+    ECLIPSE_AUTH_CALLBACK_URL: string;
+    ECLIPSE_AUTH_DOMAIN: string;
+}
+
 @injectable()
 export class Auth {
     private codeVerifier: string;
     private authConfig: AuthConfig | null;
     constructor(
         @inject('KeyChain') private keyChain: KeyChain,
-        @inject('Logger') private logger: Logger
+        @inject('Logger') private logger: Logger,
+        @inject('CoreConfig') private coreConfig: CoreConfigModule
     ) {
         this.codeVerifier = this.createCodeVerifier();
         this.authConfig = null;
     }
 
-    public async checkIfAuthFlowRequired() {
+    public async checkIfAuthFlowRequired(): Promise<boolean> {
         const rawAuthConfig = await this.keyChain.getKey('eclipse', 'auth');
 
         if (!rawAuthConfig) return this.initializeAuthFlow();
@@ -59,10 +79,36 @@ export class Auth {
         return false;
     }
 
-    public async initializeAuthFlow() {
+    public async initializeAuthFlow(): Promise<boolean> {
         const codeChallenge = this.createCodeChallenge(this.codeVerifier);
-        const authUrl = this.constructAuthUrl(codeChallenge, 'abc123');
-        this.createAuthServer();
+        const coreConfig = await this.coreConfig.get();
+
+        if (!coreConfig) {
+            this.logger.error('Core config missing. Please run eclipse --init');
+            return false;
+        }
+
+        const {
+            ECLIPSE_AUTH_DOMAIN,
+            ECLIPSE_AUTH_CLIENT_ID,
+            ECLIPSE_AUTH_CALLBACK_URL,
+            ECLIPSE_AUTH_SERVER_PORT,
+            ECLIPSE_AUTH_TARGET_AUDIENCE,
+        } = coreConfig;
+
+        this.createAuthServer({
+            ECLIPSE_AUTH_DOMAIN,
+            ECLIPSE_AUTH_CLIENT_ID,
+            ECLIPSE_AUTH_CALLBACK_URL,
+            ECLIPSE_AUTH_SERVER_PORT,
+        });
+
+        const authUrl = this.constructAuthUrl(codeChallenge, 'abc123', {
+            ECLIPSE_AUTH_DOMAIN,
+            ECLIPSE_AUTH_CLIENT_ID,
+            ECLIPSE_AUTH_TARGET_AUDIENCE,
+            ECLIPSE_AUTH_CALLBACK_URL,
+        });
         await this.openAuthPage(authUrl);
 
         this.logger.success(
@@ -81,7 +127,7 @@ export class Auth {
         return config;
     }
 
-    private async checkIfTokenExpired() {
+    private async checkIfTokenExpired(): Promise<boolean> {
         const { expiration_date } = this.authConfig as AuthConfig;
 
         if (expiration_date && Number(expiration_date) <= Date.now()) {
@@ -90,7 +136,7 @@ export class Auth {
         return false;
     }
 
-    private base64URLEncode(str: Buffer) {
+    private base64URLEncode(str: Buffer): string {
         return str
             .toString('base64')
             .replace(/\+/g, '-')
@@ -102,47 +148,52 @@ export class Auth {
         return crypto.createHash('sha256').update(buffer).digest();
     }
 
-    private createCodeVerifier() {
+    private createCodeVerifier(): string {
         return this.base64URLEncode(crypto.randomBytes(32));
     }
 
-    private createCodeChallenge(verifier: string) {
+    private createCodeChallenge(verifier: string): string {
         return this.base64URLEncode(this.sha256(verifier));
     }
 
-    private createAuthServer() {
+    private createAuthServer(serverConfig: ServerConfig): Server {
         return http
             .createServer(
                 this.handleAuthResponse(
                     this.codeVerifier,
                     this.keyChain,
-                    this.logger
+                    this.logger,
+                    serverConfig
                 )
             )
-            .listen(process.env.ECLIPSE_AUTH_SERVER_PORT, (err?: Error) => {
+            .listen(serverConfig.ECLIPSE_AUTH_SERVER_PORT, (err?: Error) => {
                 if (err) {
                     this.logger.error(
-                        `Unable to start an HTTP server on port ${process.env.ECLIPSE_AUTH_SERVER_PORT}: ${err}`
+                        `Unable to start an HTTP server on port ${serverConfig.ECLIPSE_AUTH_SERVER_PORT}: ${err}`
                     );
                 }
             });
     }
 
-    private constructAuthUrl(codeChallenge: string, state: string): string {
+    private constructAuthUrl(
+        codeChallenge: string,
+        state: string,
+        authUrlConfig: AuthUrlConfig
+    ): string {
         return [
-            `${process.env.ECLIPSE_AUTH_DOMAIN}/authorize`,
+            `${authUrlConfig.ECLIPSE_AUTH_DOMAIN}/authorize`,
             `?response_type=code`,
             `&code_challenge_method=S256`,
             `&code_challenge=${codeChallenge}`,
-            `&client_id=${process.env.ECLIPSE_AUTH_CLIENT_ID}`,
-            `&redirect_uri=${process.env.ECLIPSE_AUTH_CALLBACK_URL}`,
+            `&client_id=${authUrlConfig.ECLIPSE_AUTH_CLIENT_ID}`,
+            `&redirect_uri=${authUrlConfig.ECLIPSE_AUTH_CALLBACK_URL}`,
             `&scope=email`,
-            `&audience=${process.env.ECLIPSE_AUTH_TARGET_AUDIENCE}`,
+            `&audience=${authUrlConfig.ECLIPSE_AUTH_TARGET_AUDIENCE}`,
             `&state=${state}`,
         ].join('');
     }
 
-    private async openAuthPage(authUrl: string) {
+    private async openAuthPage(authUrl: string): Promise<void> {
         try {
             await open(authUrl, { wait: true, newInstance: true });
             return;
@@ -155,7 +206,12 @@ export class Auth {
     }
 
     private handleAuthResponse =
-        (codeVerifier: string, keychain: KeyChain, logger: Logger) =>
+        (
+            codeVerifier: string,
+            keychain: KeyChain,
+            logger: Logger,
+            serverConfig: ServerConfig
+        ) =>
         async (req: http.IncomingMessage, res: http.ServerResponse) => {
             if (!req.url) return;
 
@@ -187,7 +243,8 @@ export class Auth {
             try {
                 const { access_token, expires_in } = await requestUserToken(
                     codeVerifier,
-                    code as string
+                    code as string,
+                    serverConfig
                 );
 
                 //expires_in = seconds
