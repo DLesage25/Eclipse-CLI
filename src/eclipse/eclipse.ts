@@ -9,6 +9,7 @@ import { Logger } from './utils/logger';
 import { API } from './api';
 import { Projects } from './projects';
 import mainMenuPrompt from './prompts/mainMenu.prompt';
+import { CoreConfigModule } from './coreConfig';
 
 @injectable()
 export class Eclipse {
@@ -19,7 +20,8 @@ export class Eclipse {
         @inject('Auth') private auth: Auth,
         @inject('Logger') private logger: Logger,
         @inject('API') private _api: API,
-        @inject('Projects') private projects: Projects
+        @inject('Projects') private projects: Projects,
+        @inject('CoreConfig') private coreConfig: CoreConfigModule
     ) {
         try {
             this.execute()
@@ -62,7 +64,13 @@ export class Eclipse {
             return true;
         }
 
-        const { inject, _: postArguments } = argv;
+        const isConfigured = await this.checkForCoreConfig();
+
+        if (!isConfigured) return true;
+
+        const { inject, init, _: postArguments } = argv;
+
+        if (init) return this.restartCoreConfig();
 
         const requiresRestart = await this.auth.checkIfAuthFlowRequired();
 
@@ -86,6 +94,35 @@ export class Eclipse {
 
         if (isInProjectDirectory) await this.projects.projectDirectoryMenu();
         if (!isInProjectDirectory) await this.showTopLevelMenu();
+
+        return true;
+    }
+
+    private async checkForCoreConfig() {
+        const config = await this.coreConfig.get();
+
+        if (config) return true;
+
+        this.logger.warning(
+            "It looks like you have not configured Eclipse yet. We'll need a few values to get you set up:"
+        );
+
+        await this.coreConfig.initialize();
+
+        this.logger.success(
+            'Eclipse has been configured successfully. Please run Eclipse again and log in. :)'
+        );
+
+        return false;
+    }
+
+    private async restartCoreConfig() {
+        await this.coreConfig.delete();
+        await this.coreConfig.initialize();
+
+        this.logger.success(
+            'Eclipse has been configured successfully. Please run Eclipse again and log in. :)'
+        );
 
         return true;
     }

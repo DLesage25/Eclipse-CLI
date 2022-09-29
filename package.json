@@ -1,6 +1,6 @@
 {
     "name": "@eclipse/cli",
-    "version": "1.4.2",
+    "version": "0.0.7",
     "description": "Inject environment variables on runtime",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -50,7 +50,6 @@
         "@rollup/plugin-commonjs": "^22.0.2",
         "@rollup/plugin-json": "^4.1.0",
         "@rollup/plugin-node-resolve": "^14.0.0",
-        "@rollup/plugin-replace": "^4.0.0",
         "@rollup/plugin-typescript": "^8.5.0",
         "@types/axios": "^0.14.0",
         "@types/color-support": "^1.1.1",

@@ -10,8 +10,12 @@ export class Options {
             .version(packageJson.version)
             .description(cyan('Inject environment variables on runtime'))
             .option(
-                '--all',
-                'Inject environment variables into the execution context (make sure you are inside a project folder with an .eclipserc on it).'
+                '--inject=all',
+                'Inject all project secrets into the execution context (make sure you are inside a project folder with an .eclipserc on it).'
+            )
+            .option(
+                '--init',
+                'Initialize the CLI and populate all required variables to communicate with Eclipse web.'
             )
             .outputHelp();
     }
