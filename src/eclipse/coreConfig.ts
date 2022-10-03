@@ -27,22 +27,16 @@ export class CoreConfigModule {
     }
 
     public async initialize() {
-        const {
-            ECLIPSE_AUTH_SERVER_PORT,
-            ECLIPSE_API_URL,
-            ECLIPSE_AUTH_CALLBACK_URL,
-            ECLIPSE_AUTH_CLIENT_ID,
-            ECLIPSE_AUTH_DOMAIN,
-            ECLIPSE_AUTH_TARGET_AUDIENCE,
-        } = await initPrompt();
+        const { ECLIPSE_API_URL, ECLIPSE_AUTH_CLIENT_ID, ECLIPSE_AUTH_DOMAIN } =
+            await initPrompt();
 
         await this.set({
-            ECLIPSE_AUTH_SERVER_PORT,
+            ECLIPSE_AUTH_SERVER_PORT: 4242,
             ECLIPSE_API_URL,
-            ECLIPSE_AUTH_CALLBACK_URL,
+            ECLIPSE_AUTH_CALLBACK_URL: 'http://localhost:4242',
             ECLIPSE_AUTH_CLIENT_ID,
             ECLIPSE_AUTH_DOMAIN,
-            ECLIPSE_AUTH_TARGET_AUDIENCE,
+            ECLIPSE_AUTH_TARGET_AUDIENCE: 'http://api.tuple.com',
         });
         return;
     }

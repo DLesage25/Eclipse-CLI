@@ -112,7 +112,7 @@ export class Auth {
         await this.openAuthPage(authUrl);
 
         this.logger.success(
-            'You are now logged in! Please run eclipse again in your terminal.'
+            'You are now logged in! Please hit control+C and run eclipse again in your terminal.'
         );
 
         return true;

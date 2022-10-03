@@ -104,13 +104,13 @@ export class Eclipse {
         if (config) return true;
 
         this.logger.warning(
-            "It looks like you have not configured Eclipse yet. We'll need a few values to get you set up:"
+            "It looks like this is your first time running Eclipse. Let's get you set up!"
         );
 
         await this.coreConfig.initialize();
 
         this.logger.success(
-            'Eclipse has been configured successfully. Please run Eclipse again and log in. :)'
+            'Eclipse has been configured successfully. Please run Eclipse again to log in. :)'
         );
 
         return false;

@@ -3,9 +3,9 @@ import { Project } from '../types/Project.type';
 
 const projectActions = [
     {
-        name: 'View secrets from this project.',
-        value: 'view',
-        short: 'View secrets',
+        name: 'Initialize a config file in this directory.',
+        value: 'createConfig',
+        short: 'Create config file',
     },
     {
         name: 'Add a secret to this project.',
@@ -18,14 +18,14 @@ const projectActions = [
         short: 'Remove secret',
     },
     {
+        name: 'View secrets from this project.',
+        value: 'view',
+        short: 'View secrets',
+    },
+    {
         name: 'Print project secrets to an .env file.',
         value: 'print',
         short: 'Print secrets to env file',
-    },
-    {
-        name: 'Initialize a config file in this directory.',
-        value: 'createConfig',
-        short: 'Create config file',
     },
 ];
 
