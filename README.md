@@ -1,5 +1,7 @@
 # EclipseJS CLI
 
+A CLI tool that injects environment variables into an execution context, removing the need for local environment files.
+
 ## Contributing
 
 ### Releases
