@@ -1,4 +1,4 @@
-name: 'Create release'
+name: 'Bump pkg version'
 
 on:
     push:
@@ -33,16 +33,3 @@ jobs:
               env:
                   NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
               run: echo "new tag $NEW_TAG"
-    tagged-release:
-        name: 'Create tagged release'
-        needs: bump-version
-        runs-on: 'ubuntu-latest'
-
-        steps:
-            - uses: 'marvinpinto/action-automatic-releases@latest'
-              with:
-                  repo_token: '${{ secrets.GITHUB_TOKEN }}'
-                  title: 'Production release'
-                  prerelease: false
-                  files: |
-                      README.md
