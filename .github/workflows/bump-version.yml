@@ -35,6 +35,7 @@ jobs:
               run: echo "new tag $NEW_TAG"
     tagged-release:
         name: 'Create tagged release'
+        needs: bump-version
         runs-on: 'ubuntu-latest'
 
         steps:
