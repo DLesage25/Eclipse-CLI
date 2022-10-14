@@ -1,6 +1,6 @@
 {
     "name": "@eclipse/cli",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Inject environment variables on runtime",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
