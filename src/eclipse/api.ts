@@ -3,6 +3,7 @@ import { inject, injectable } from 'inversify';
 import { Auth } from './auth/auth';
 import { CoreConfigModule } from './coreConfig';
 import { CreateSecretDto } from './dtos/createSecret.dto';
+import { ApiConfig } from './types/CoreConfig.type';
 import { Project } from './types/Project.type';
 import { RevealedSecret } from './types/Secret.type';
 import { Logger } from './utils/logger';
@@ -16,9 +17,10 @@ export class API {
         @inject('CoreConfig') private coreConfig: CoreConfigModule
     ) {
         this._http = axios.create({
-            baseURL: '',
+            baseURL: process.env.ECLIPSE_API_URL,
             headers: {
                 Authorization: '',
+                'X-ECLIPSE_CLI_KEY': process.env.ECLIPSE_CLI_KEY as string,
             },
         });
     }
@@ -36,14 +38,16 @@ export class API {
 
         const { access_token } = config;
 
-        this._http.defaults.baseURL = coreConfig.ECLIPSE_API_URL;
-
         this._http.interceptors.request.use((config) => {
             if (!config.headers) config.headers = {};
 
             config.headers[`Authorization`] = `Bearer ${access_token}`;
             return config;
         });
+    }
+
+    public async getCliValues(): Promise<ApiConfig> {
+        return this._http.post('/cli').then((res) => res.data);
     }
 
     public async getUser() {
