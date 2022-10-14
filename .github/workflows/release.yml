@@ -24,7 +24,7 @@ jobs:
                   tag-prefix: 'v'
                   minor-wording: 'feat,chore,deps,docs'
                   major-wording: 'major'
-                  patch-wording: 'patch,fix'
+                  patch-wording: 'patch,fix,cd,ci'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: 'cat package.json'
