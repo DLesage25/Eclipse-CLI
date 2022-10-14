@@ -103,11 +103,20 @@ export class Eclipse {
 
         if (config) return true;
 
-        this.logger.warning(
-            "It looks like this is your first time running Eclipse. Let's get you set up!"
-        );
+        this.logger.warning('The CLI is syncing with Eclipse servers...');
 
-        await this.coreConfig.initialize();
+        const cliKeys = await this._api.getCliValues();
+
+        if (!cliKeys) return false;
+
+        if (!cliKeys) {
+            this.logger.error(
+                'We were not able to contact the Eclipse servers. Please retry, or if the problem persists contact support @ support@eclipsejs.io'
+            );
+            return false;
+        }
+
+        await this.coreConfig.initialize(cliKeys);
 
         this.logger.success(
             'Eclipse has been configured successfully. Please run Eclipse again to log in. :)'
@@ -118,7 +127,7 @@ export class Eclipse {
 
     private async restartCoreConfig() {
         await this.coreConfig.delete();
-        await this.coreConfig.initialize();
+        await this.checkForCoreConfig();
 
         this.logger.success(
             'Eclipse has been configured successfully. Please run Eclipse again and log in. :)'
