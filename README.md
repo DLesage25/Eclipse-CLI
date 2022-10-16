@@ -115,7 +115,9 @@ $ Secret deleted.
 
 ##### Printing to env file
 
-You can optionally print project secrets to a `.env` file if you do not wish to use Eclipse's environment injection feature. Do this through the CLI menu, or if you are on a directory with a config file, run:
+You can optionally print project secrets to a `.env` file if you do not wish to use Eclipse's environment injection feature. You can do this through the CLI menu.
+
+If you are on a directory with a config file, you can also run:
 
 ```console
 foo@bar:~$ eclipse print .env
