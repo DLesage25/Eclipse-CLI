@@ -1,6 +1,6 @@
 {
     "name": "@eclipsejs/cli",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Inject environment variables on runtime",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
