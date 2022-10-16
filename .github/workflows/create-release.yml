@@ -25,4 +25,4 @@ jobs:
               with:
                   artifacts: 'Release.txt'
                   generateReleaseNotes: true
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.ACTION_TOKEN }}
