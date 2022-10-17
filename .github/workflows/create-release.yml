@@ -5,6 +5,11 @@ on:
             release-type:
                 description: 'Release type (one of): patch, minor, major, prepatch, preminor, premajor, prerelease'
                 required: true
+
+env:
+    ECLIPSE_API_URL: ${{secrets.ECLIPSE_API_URL}}
+    CLI_KEY: ${{secrets.CLI_KEY}}
+
 jobs:
     release:
         runs-on: ubuntu-latest
@@ -18,7 +23,7 @@ jobs:
               uses: actions/setup-node@v2
               with:
                   registry-url: https://registry.npmjs.org/
-                  node-version: '14'
+                  node-version: '16'
 
             # Install dependencies (required by Run tests step)
             - name: Install dependencies
