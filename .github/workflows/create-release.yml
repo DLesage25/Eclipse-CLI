@@ -7,8 +7,8 @@ on:
                 required: true
 
 env:
-    ECLIPSE_API_URL: ${{secrets.ECLIPSE_API_URL}}
-    CLI_KEY: ${{secrets.CLI_KEY}}
+    ECLIPSE_API_URL: ${{ secrets.ECLIPSE_API_URL }}
+    ECLIPSE_CLI_KEY: ${{ secrets.ECLIPSE_CLI_KEY }}
 
 jobs:
     release:
