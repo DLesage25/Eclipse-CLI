@@ -68,7 +68,7 @@ export class Eclipse {
 
         if (!isConfigured) return true;
 
-        const { inject, init, _: postArguments } = argv;
+        const { init, _: postArguments } = argv;
 
         if (init) return this.restartCoreConfig();
 
@@ -83,12 +83,8 @@ export class Eclipse {
         const isInProjectDirectory =
             await this.projects.checkIfOnProjectDirectory();
 
-        if (isInProjectDirectory && inject) {
-            const [coreProcess, ...processArgs] = postArguments;
-            await this.projects.injectLocalProjectSecrets(
-                coreProcess,
-                processArgs
-            );
+        if (isInProjectDirectory && postArguments.length) {
+            await this.projectDirectoryActions(postArguments);
             return true;
         }
 
@@ -123,6 +119,25 @@ export class Eclipse {
         );
 
         return false;
+    }
+
+    private async processInjectCommand(postArguments: Array<string>) {
+        const [injectArg, coreProcess, ...processArgs] = postArguments;
+
+        await this.projects.injectLocalProjectSecrets(coreProcess, processArgs);
+
+        return true;
+    }
+
+    private async projectDirectoryActions(postArguments: Array<string>) {
+        const [coreCommand, ...commandArgs] = postArguments;
+
+        switch (coreCommand) {
+            case 'inject':
+                return this.processInjectCommand(commandArgs);
+            default:
+                return () => this.logger.warning('Command not recognized');
+        }
     }
 
     private async restartCoreConfig() {

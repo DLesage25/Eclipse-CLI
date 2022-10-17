@@ -16,6 +16,8 @@ export declare class Eclipse {
     constructor(options: Options, auth: Auth, logger: Logger, _api: API, projects: Projects, coreConfig: CoreConfigModule);
     execute(): Promise<boolean>;
     private checkForCoreConfig;
+    private processInjectCommand;
+    private projectDirectoryActions;
     private restartCoreConfig;
     private showTopLevelMenu;
     private showIntroLog;
