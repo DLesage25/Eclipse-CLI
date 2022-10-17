@@ -30,3 +30,5 @@ service-worker.js
 *.data
 
 .DS_Store
+
+lib
