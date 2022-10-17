@@ -8,6 +8,7 @@
     "author": "Daniel Lesage <me@daniellesage.com>",
     "license": "MIT",
     "scripts": {
+        "prepare": "npm run build",
         "start": "npm run build && npm run global",
         "build": " rm -rf ./lib && npx rollup -c",
         "global": "sudo npm i -g && eclipse",
