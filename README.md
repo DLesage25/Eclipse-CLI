@@ -37,50 +37,35 @@ $ Log in successful! Please run eclipse again in your terminal.
 
 #### Usage
 
-You can use the Eclipse CLI to view and set project secrets, as well as initialize configuration files that tell Eclipse which project a directory belongs to.
-
-##### Select a project
-
-Use your arrow keys to select `See my projects`
-
-```console
-foo@bar:~$ eclipse
-? What would you like to do? (Use arrow keys)
-❯ See my projects
-  Log out
-```
-
-Select the project you want to work on:
-
-```console
-? What would you like to do? View projects
-? Please select a project. (Use arrow keys)
-❯ MERN project - 2022-10-03T00:39:50.097Z
-  DEV_MERN_PROJECT - 2022-10-07T15:10:46.343Z
-```
-
-##### Project actions
-
-There are a number of actions you can perform from the CLI.
-
-```console
-? What would you like to do? (Use arrow keys)
-❯ Initialize a config file in this directory.
-  Add a secret to this project.
-  Remove a secret from this project.
-  View secrets from this project.
-  Print project secrets to an .env file.
-```
+You can access Eclipse's menu by running `eclipse` in your terminal. There are also simple shortcuts that you can use to interact with the CLI.
 
 ##### Initialize a config file
 
-Eclipse config files (`.eclipserc`) tell Eclipse which project your repository belongs to. If you select this option, Eclipse will create a config file in the current working directory with the identifier of the project you selected.
+Eclipse config files (`.eclipserc`) tell Eclipse which project your repository belongs to. You can initialize a config file via the menu, selecting the `Initialize a config file` option.
+
+Eclipse will create a config file in the current working directory with the identifier of the project you selected.
 
 Once the config file is created, you will be able to use the CLI to inject environment variables into your code's execution context.
 
 ##### Inject environment variables
 
-To do this, run `eclipse --inject=<flag> <command>` where `<flag>` is `all` or a comma-separated list of secret classifiers that you wish to inject, and `<command>` is the command you use to run your code (e.g. `npm start/build/test/deploy`).
+Eclipse can inject environment variables into any execution context. You can do this by running `eclipse --inject=<classifier> <command>` where `<classifier>` is `all` or a comma-separated list of secret classifiers that you wish to inject, and `<command>` is the command you use to run your code (e.g. `npm start/build/test/deploy`).
+
+```console
+foo@bar:~$ eclipse --inject=all node
+> console.log(process.env)
+SOME_SECRET=some_value
+SOME_OTHER_SECRET=some_other_value
+```
+
+You can also filter the injected secrets by passing in a classifier:
+
+```console
+foo@bar:~$ eclipse --inject=staging node
+> console.log(process.env)
+STAGING_SECRET=staging_value
+OTHER_STAGING_SECRET=other_staging_value
+```
 
 ##### List all project secrets
 
