@@ -20,6 +20,10 @@
     "bin": {
         "eclipse": "bin/eclipse"
     },
+    "files": [
+        "lib",
+        "bin"
+    ],
     "keywords": [
         "cli",
         "liftr",
