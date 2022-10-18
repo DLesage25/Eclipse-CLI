@@ -4,7 +4,7 @@ on:
         branches: [main]
 
 jobs:
-    release:
+    build-and-lint:
         runs-on: ubuntu-latest
         steps:
             # Checkout project repository
