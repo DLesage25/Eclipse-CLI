@@ -1,10 +1,10 @@
-name: 'Continuous Integrations'
-on: 
+name: 'Continuous Integration'
+on:
     pull_request:
         branches: [main, develop]
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
     lint:
