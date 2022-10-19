@@ -2,12 +2,12 @@ import inquirer from 'inquirer';
 
 const menuActions = [
     {
-        name: 'See my projects',
+        name: '🔐 See my projects',
         value: 'view',
         short: 'View projects',
     },
     {
-        name: 'Log out',
+        name: '🚪 Log out',
         value: 'logout',
         short: 'Log out',
     },
