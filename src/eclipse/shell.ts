@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { spawn } from 'child_process';
 
 @injectable()
-export class Cmd {
+export class Shell {
     public initialize(
         coreProcess: string,
         processArgs: string[],
