@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { API } from './api';
-import { Cmd } from './cmd';
+import { Shell } from './shell';
 import { ProjectConfig } from './projectConfig';
 import projectSelectionPrompt from './prompts/projectSelection.prompt';
 import singleProjectActionPrompt from './prompts/singleProjectAction.prompt';
@@ -17,7 +17,7 @@ export class Projects {
         @inject('Secrets') private secrets: Secrets,
         @inject('EnvFile') private envFile: FileUtil,
         @inject('ProjectConfig') private projectConfig: ProjectConfig,
-        @inject('CMD') private cmd: Cmd
+        @inject('Shell') private shell: Shell
     ) {}
 
     private projectActions(action: string, project: Project) {
@@ -157,6 +157,6 @@ export class Projects {
     ) {
         const secrets = await this.getCurrentProjectSecrets(classifiers);
         if (!secrets) return;
-        return this.cmd.initialize(coreProcess, processArgs, secrets);
+        return this.shell.initialize(coreProcess, processArgs, secrets);
     }
 }
