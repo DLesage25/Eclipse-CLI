@@ -113,7 +113,7 @@ export class Eclipse {
     ) {
         const [coreCommand] = postArguments;
 
-        if (PROJECT_ACTIONS[coreCommand] && !isInProjectDirectory) {
+        if (PROJECT_ACTIONS[coreCommand]) {
             if (!isInProjectDirectory) return false;
 
             return this.processProjectCommand(postArguments);
@@ -149,6 +149,7 @@ export class Eclipse {
 
         switch (coreCommand) {
             case 'inject':
+            case 'i':
                 return this.processInjectCommand(commandArgs);
             default:
                 this.logger.warning('Command not recognized');
