@@ -78,13 +78,17 @@ export class API {
             });
     }
 
-    public async getSecrets(projectId: string): Promise<RevealedSecret[]> {
+    public async getSecrets(
+        projectId: string,
+        classifiers?: Array<string>
+    ): Promise<RevealedSecret[]> {
         return this._http
             .get('/secrets/reveal', {
                 data: {
                     project: {
                         _id: projectId,
                     },
+                    classifiers,
                 },
             })
             .then((res) => res.data)

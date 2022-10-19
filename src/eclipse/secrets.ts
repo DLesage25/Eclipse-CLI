@@ -27,8 +27,8 @@ export class Secrets {
         return;
     }
 
-    public async getSecrets(project: Project) {
-        const secrets = await this._api.getSecrets(project._id);
+    public async getSecrets(project: Project, classifiers?: Array<string>) {
+        const secrets = await this._api.getSecrets(project._id, classifiers);
 
         if (!secrets.length) {
             return;
