@@ -129,7 +129,7 @@ export class Projects {
         return this.projectConfig.checkIfExists();
     }
 
-    public async getCurrentProjectSecrets() {
+    public async getCurrentProjectSecrets(classifiers?: string[]) {
         const configData = await this.projectConfig.readConfigFile();
 
         if (!configData['PROJECT']) {
@@ -140,7 +140,7 @@ export class Projects {
         }
 
         const project = await this.getProject(configData['PROJECT']);
-        const secrets = await this.secrets.getSecrets(project);
+        const secrets = await this.secrets.getSecrets(project, classifiers);
 
         if (!secrets) {
             this.logger.warning(`No secrets found for project ${project.name}`);
@@ -152,9 +152,10 @@ export class Projects {
 
     public async injectLocalProjectSecrets(
         coreProcess: string,
-        processArgs: string[]
+        processArgs: string[],
+        classifiers?: string[]
     ) {
-        const secrets = await this.getCurrentProjectSecrets();
+        const secrets = await this.getCurrentProjectSecrets(classifiers);
         if (!secrets) return;
         return this.cmd.initialize(coreProcess, processArgs, secrets);
     }

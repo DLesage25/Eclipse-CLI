@@ -124,7 +124,16 @@ export class Eclipse {
     private async processInjectCommand(postArguments: Array<string>) {
         const [injectArg, coreProcess, ...processArgs] = postArguments;
 
-        await this.projects.injectLocalProjectSecrets(coreProcess, processArgs);
+        const classifiers =
+            injectArg !== 'all'
+                ? injectArg.split(',').filter((i) => i !== '')
+                : undefined;
+
+        await this.projects.injectLocalProjectSecrets(
+            coreProcess,
+            processArgs,
+            classifiers
+        );
 
         return true;
     }

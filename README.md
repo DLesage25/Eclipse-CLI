@@ -55,25 +55,25 @@ Once the config file is created, you will be able to use the CLI to inject envir
 Eclipse can inject environment variables into any execution context. Use the following syntax:
 
 ```console
-eclipse --inject=<classifier> <command>
+eclipse inject <classifiers> <command>
 ```
 
--   `<classifier>` can be `all` or a comma-separated list of secret classifiers that you wish to inject
+-   `<classifier>` can be `all` or a comma-separated list of secret classifiers that you wish to inject (e.g. `web,staging`)
 -   `<command>` is the command you use to run your code (e.g. `npm start/build/test/deploy`)
 
 You can try this out by injecting secrets unto a Node REPL and logging your `process.env`:
 
 ```console
-foo@bar:~$ eclipse --inject=all node
+foo@bar:~$ eclipse inject all node
 > console.log(process.env)
 SOME_SECRET=some_value
 SOME_OTHER_SECRET=some_other_value
 ```
 
-You can also filter the injected secrets by passing in a classifier:
+You can also filter the injected secrets by passing in one or more comma-separated classifiers:
 
 ```console
-foo@bar:~$ eclipse --inject=staging node
+foo@bar:~$ eclipse inject web,staging node
 > console.log(process.env)
 STAGING_SECRET=staging_value
 OTHER_STAGING_SECRET=other_staging_value
