@@ -22,12 +22,12 @@ yarn add global @eclipse/cli
 
 #### Initialize CLI
 
-Run `eclipse` in your terminal. The first time the CLI is ran, it will download configuration values from the Eclipse servers.
+Run `eclipse` in your terminal. The first time the CLI is ran, it will download configuration values from the Eclipse servers and attempt to log you in.
 
 ```console
 foo@bar:~$ eclipse
 $ Welcome to EclipseJS! Initializing configuration...
-$ Ecipse CLI is configured! Run Eclipse again to log in.
+$ Eclipse has been configured successfully. 🚀 Attempting to log you in...
 ```
 
 #### Log in

@@ -101,11 +101,9 @@ export class Eclipse {
 
         await this.coreConfig.initialize(cliKeys);
 
-        this.logger.success(
-            'Eclipse has been configured successfully. Please run Eclipse again to log in. :)'
-        );
+        this.logger.success('Eclipse has been configured successfully. 🚀');
 
-        return false;
+        return true;
     }
 
     private async showTopLevelMenu(): Promise<boolean> {

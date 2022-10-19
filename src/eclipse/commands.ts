@@ -4,13 +4,15 @@ import { Logger } from './utils/logger';
 import * as packageJson from '../../package.json';
 import { Options } from './options';
 import { PROJECT_ACTIONS } from './constants/commands';
+import { Auth } from './auth/auth';
 
 @injectable()
 export class Commands {
     constructor(
         @inject('Options') private options: Options,
         @inject('Logger') private logger: Logger,
-        @inject('Projects') private projects: Projects
+        @inject('Projects') private projects: Projects,
+        @inject('Auth') private auth: Auth
     ) {}
 
     public async processCommand(
@@ -46,6 +48,9 @@ export class Commands {
             case 'version':
             case 'v':
                 this.showToolVersion();
+                return true;
+            case 'logout':
+                await this.auth.logout();
                 return true;
             default:
                 this.logger.warning('Command not recognized');

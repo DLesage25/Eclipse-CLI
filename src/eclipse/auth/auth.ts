@@ -84,7 +84,7 @@ export class Auth {
         const coreConfig = await this.coreConfig.get();
 
         if (!coreConfig) {
-            this.logger.error('Core config missing. Please run eclipse --init');
+            this.logger.error('Core config missing. Please run eclipse again.');
             return false;
         }
 
@@ -112,7 +112,7 @@ export class Auth {
         await this.openAuthPage(authUrl);
 
         this.logger.success(
-            'You are now logged in! Please hit control+C and run eclipse again in your terminal.'
+            'A new tab will open in your default browser. Once you have logged in, hit control+C and run eclipse again.'
         );
 
         return true;
