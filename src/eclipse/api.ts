@@ -108,12 +108,12 @@ export class API {
             });
     }
 
-    public async deleteSecret(secretId: string) {
+    public async deleteSecret(secretId: string, secretName: string) {
         return this._http
             .delete(`/secrets/${secretId}`)
-            .then((res) => {
+            .then(() => {
                 this.logger.success(
-                    `Secret ${res.data._id} successfully deleted.`
+                    `Secret ${secretName} successfully deleted.`
                 );
                 return;
             })

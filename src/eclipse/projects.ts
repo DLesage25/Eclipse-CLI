@@ -8,6 +8,7 @@ import { Secrets } from './secrets';
 import { Project } from './types/Project.type';
 import { FileUtil, objectToFileNotation } from './utils/fileUtil';
 import { Logger } from './utils/logger';
+import createSecretPrompt from './prompts/createSecret.prompt';
 
 @injectable()
 export class Projects {
@@ -25,9 +26,9 @@ export class Projects {
             case 'view':
                 return this.viewProjectSecrets(project);
             case 'add':
-                return this.secrets.addSecret(project);
+                return this.secrets.addSecretFromMenu(project);
             case 'remove':
-                return this.secrets.removeSecret(project);
+                return this.secrets.removeSecretFromMenu(project);
             case 'print':
                 return this.printSecrets(project);
             case 'createConfig':
