@@ -2,22 +2,22 @@ import inquirer from 'inquirer';
 
 const projectActions = [
     {
-        name: 'View secrets from this project.',
-        value: 'view',
-        short: 'View secrets',
-    },
-    {
-        name: 'Add a secret to this project.',
+        name: '🔑 Add a secret to this project.',
         value: 'add',
         short: 'Add secret',
     },
     {
-        name: 'Remove a secret from this project.',
+        name: '🗑  Remove a secret from this project.',
         value: 'remove',
         short: 'Remove secret',
     },
     {
-        name: 'Print project secrets to an .env file.',
+        name: '🔭 View secrets from this project.',
+        value: 'view',
+        short: 'View secrets',
+    },
+    {
+        name: '🖊  Print project secrets to an .env file.',
         value: 'print',
         short: 'Print secrets to env file',
     },

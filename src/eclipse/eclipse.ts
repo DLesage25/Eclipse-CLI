@@ -86,7 +86,7 @@ export class Eclipse {
 
         if (config) return true;
 
-        this.logger.warning('The CLI is syncing with Eclipse servers...');
+        this.logger.warning('The CLI is syncing with Eclipse servers.. 🛰');
 
         const cliKeys = await this._api.getCliValues();
 
