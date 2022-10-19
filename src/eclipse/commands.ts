@@ -20,7 +20,12 @@ export class Commands {
         const [coreCommand] = postArguments;
 
         if (PROJECT_ACTIONS[coreCommand]) {
-            if (!isInProjectDirectory) return false;
+            if (!isInProjectDirectory) {
+                this.logger.warning(
+                    'You need to be on a project directory to use this command.'
+                );
+                return false;
+            }
 
             return this.processProjectCommand(postArguments);
         }

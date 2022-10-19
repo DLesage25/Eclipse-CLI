@@ -68,7 +68,7 @@ export class Eclipse {
         const isInProjectDirectory =
             await this.projects.checkIfOnProjectDirectory();
 
-        if (isInProjectDirectory && postArguments.length) {
+        if (postArguments.length) {
             return this.commands.processCommand(
                 postArguments,
                 isInProjectDirectory
