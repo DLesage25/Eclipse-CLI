@@ -8,10 +8,10 @@ export class Options {
     public showOptions(): void {
         return program
             .version(packageJson.version)
-            .description(cyan('Inject environment variables on runtime'))
+            .add.description(cyan('Inject environment variables on runtime'))
             .option(
-                '--inject=all',
-                'Inject all project secrets into the execution context (make sure you are inside a project folder with an .eclipserc on it).'
+                'inject <classifiers> <command>',
+                'Inject project secrets into the execution context. Classifiers can be "all" or a comma-separated list of classifiers.'
             )
             .option(
                 '--init',

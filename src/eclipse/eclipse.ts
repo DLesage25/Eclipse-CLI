@@ -1,15 +1,16 @@
 import 'reflect-metadata';
 import minimist from 'minimist';
 import * as packageJson from '../../package.json';
-
 import { inject, injectable } from 'inversify';
+
 import { Options } from './options';
 import { Auth } from './auth/auth';
 import { Logger } from './utils/logger';
 import { API } from './api';
 import { Projects } from './projects';
-import mainMenuPrompt from './prompts/mainMenu.prompt';
 import { CoreConfigModule } from './coreConfig';
+import mainMenuPrompt from './prompts/mainMenu.prompt';
+import { PROJECT_ACTIONS } from './constants/commands';
 
 @injectable()
 export class Eclipse {
@@ -52,25 +53,9 @@ export class Eclipse {
 
         this.suppressError = argv.suppressError;
 
-        const showVersion: boolean = argv.v || argv.version;
-        if (showVersion) {
-            this.showToolVersion();
-            return true;
-        }
-
-        const showHelp: boolean = argv.h || argv.help;
-        if (showHelp) {
-            this.showHelpLog();
-            return true;
-        }
-
         const isConfigured = await this.checkForCoreConfig();
 
         if (!isConfigured) return true;
-
-        const { init, _: postArguments } = argv;
-
-        if (init) return this.restartCoreConfig();
 
         const requiresRestart = await this.auth.checkIfAuthFlowRequired();
 
@@ -80,12 +65,13 @@ export class Eclipse {
 
         this.logger.verticalSeparator();
 
+        const { _: postArguments } = argv;
+
         const isInProjectDirectory =
             await this.projects.checkIfOnProjectDirectory();
 
         if (isInProjectDirectory && postArguments.length) {
-            await this.projectDirectoryActions(postArguments);
-            return true;
+            return this.processCommand(postArguments, isInProjectDirectory);
         }
 
         if (isInProjectDirectory) await this.projects.projectDirectoryMenu();
@@ -94,7 +80,7 @@ export class Eclipse {
         return true;
     }
 
-    private async checkForCoreConfig() {
+    private async checkForCoreConfig(): Promise<boolean> {
         const config = await this.coreConfig.get();
 
         if (config) return true;
@@ -121,7 +107,58 @@ export class Eclipse {
         return false;
     }
 
-    private async processInjectCommand(postArguments: Array<string>) {
+    private async processCommand(
+        postArguments: Array<string>,
+        isInProjectDirectory: boolean
+    ) {
+        const [coreCommand] = postArguments;
+
+        if (PROJECT_ACTIONS[coreCommand] && !isInProjectDirectory) {
+            if (!isInProjectDirectory) return false;
+
+            return this.processProjectCommand(postArguments);
+        }
+
+        return this.processGenericCommand(postArguments);
+    }
+
+    private async processGenericCommand(
+        postArguments: Array<string>
+    ): Promise<boolean> {
+        const [coreCommand] = postArguments;
+
+        switch (coreCommand) {
+            case 'help':
+            case 'h':
+                this.showHelpLog();
+                return true;
+            case 'version':
+            case 'v':
+                this.showToolVersion();
+                return true;
+            default:
+                this.logger.warning('Command not recognized');
+                return false;
+        }
+    }
+
+    private async processProjectCommand(
+        postArguments: Array<string>
+    ): Promise<boolean> {
+        const [coreCommand, ...commandArgs] = postArguments;
+
+        switch (coreCommand) {
+            case 'inject':
+                return this.processInjectCommand(commandArgs);
+            default:
+                this.logger.warning('Command not recognized');
+                return false;
+        }
+    }
+
+    private async processInjectCommand(
+        postArguments: Array<string>
+    ): Promise<boolean> {
         const [injectArg, coreProcess, ...processArgs] = postArguments;
 
         const classifiers =
@@ -138,29 +175,7 @@ export class Eclipse {
         return true;
     }
 
-    private async projectDirectoryActions(postArguments: Array<string>) {
-        const [coreCommand, ...commandArgs] = postArguments;
-
-        switch (coreCommand) {
-            case 'inject':
-                return this.processInjectCommand(commandArgs);
-            default:
-                return () => this.logger.warning('Command not recognized');
-        }
-    }
-
-    private async restartCoreConfig() {
-        await this.coreConfig.delete();
-        await this.checkForCoreConfig();
-
-        this.logger.success(
-            'Eclipse has been configured successfully. Please run Eclipse again and log in. :)'
-        );
-
-        return true;
-    }
-
-    private async showTopLevelMenu() {
+    private async showTopLevelMenu(): Promise<boolean> {
         const { action } = await mainMenuPrompt();
 
         if (action === 'view') await this.projects.projectSelection();
