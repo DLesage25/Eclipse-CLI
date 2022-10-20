@@ -80,15 +80,23 @@ foo@bar:~$ eclipse i web,staging npm start
 You can list project secrets and their values on your console using the CLI menu. If you are on a directory with a config file, you can also run:
 
 ```console
-$ eclipse list/ls
+$ eclipse list/ls <optional - classifiers>
 ```
 
-For example:
+Listing all project secrets:
 
 ```console
 foo@bar:~$ eclipse ls
 MY_SECRET=some_value
 MY_OTHER_SECRET=some_other_value
+```
+
+Listing project secrets that contain only the given classifiers:
+
+```console
+foo@bar:~$ eclipse ls web,staging
+MY_WEB_STAGING_SECRET=some_value
+MY_OTHER_WEB_STAGING_SECRET=some_other_value
 ```
 
 #### Managing secrets

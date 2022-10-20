@@ -19,6 +19,10 @@ export class Options {
                 'a, add <secretname> <secretvalue> <classifiers>',
                 'Create a secret under the working project directory. Classifiers must be comma-separated.'
             )
+            .option(
+                'ls, list <classifiers - optional>',
+                'Show project secrets and their values on the console. Classifiers must be comma-separated.'
+            )
             .addHelpText(
                 'after',
                 `
@@ -41,6 +45,14 @@ export class Options {
             
             Creating a secret with multiple classifiers:
             $ eclipse add my_secret "SECRET_HASH_345" backend,production
+
+            Examples - listing secrets:
+
+            Listing all project secrets:
+            $ eclipse ls
+
+            Listing project secrets with a given classifier:
+            $ eclipse ls web,staging
 
             `
             )
