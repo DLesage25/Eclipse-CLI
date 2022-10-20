@@ -78,8 +78,11 @@ export class Projects {
         return this.projectActions(action, project);
     }
 
-    private async viewProjectSecrets(project: Project) {
-        const secrets = await this.secrets.getSecrets(project);
+    public async viewProjectSecrets(
+        project: Project,
+        classifiers?: Array<string>
+    ) {
+        const secrets = await this.secrets.getSecrets(project, classifiers);
 
         if (!secrets) {
             this.logger.warning(`No secrets found for project ${project.name}`);

@@ -72,10 +72,35 @@ export class Commands {
             case 'add':
             case 'a':
                 return this.processAddCommand(commandArgs);
+            case 'list':
+            case 'ls':
+                return this.processListCommand(commandArgs);
             default:
                 this.logger.warning('Command not recognized');
                 return false;
         }
+    }
+
+    private async processListCommand(
+        postArguments: Array<string>
+    ): Promise<boolean> {
+        const [rawClassifiers] = postArguments;
+        const classifiers = rawClassifiers
+            ? rawClassifiers.split(',').filter((i) => i !== '')
+            : undefined;
+
+        const project = await this.projects.getCurrentProject();
+
+        if (!project) {
+            this.logger.error(
+                'Could not fetch current project. Please try again.'
+            );
+            return false;
+        }
+
+        await this.projects.viewProjectSecrets(project, classifiers);
+
+        return true;
     }
 
     private async processAddCommand(
