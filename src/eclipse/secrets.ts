@@ -32,7 +32,7 @@ export class Secrets {
         value: string,
         rawClassifiers: string
     ) {
-        const classifiers = rawClassifiers.split(' ');
+        const classifiers = rawClassifiers.split(',').filter((i) => i !== '');
         const { name: createdName } = await this._api.createSecret({
             projectId: project._id,
             name,
