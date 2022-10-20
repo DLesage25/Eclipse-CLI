@@ -263,6 +263,7 @@ export class Auth {
                 return res.end();
             } catch (err) {
                 logger.error(`Error attempting to save access token: ${err}`);
+                return;
             }
         };
 
