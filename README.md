@@ -5,11 +5,11 @@
 
 Eclipse is an environment manager that injects sensitive configuration values into your code's execution context, removing the need for local environment files.
 
-### Getting started
+## Getting started
 
 First, log in to [Eclipse](https://eclipsejs.io) and set up a project and secrets. You can classify secrets based on their environment (local, staging, prod), or their context (web, api, db).
 
-#### Installation
+### Installation
 
 You can install Eclipse using NPM or Yarn
 
@@ -20,7 +20,7 @@ npm i -g @eclipse/cli
 yarn add global @eclipse/cli
 ```
 
-#### Initialize CLI
+### Initialize and log in
 
 Run `eclipse` in your terminal. The first time the CLI is ran, it will download configuration values from the Eclipse servers and attempt to log you in.
 
@@ -30,32 +30,31 @@ $ Welcome to EclipseJS! Initializing configuration...
 $ Eclipse has been configured successfully. 🚀 Attempting to log you in...
 ```
 
-#### Log in
+### Log in
 
 ```console
 foo@bar:~$ eclipse login
 $ A new tab will open in your default browser. Please log in and come back to your terminal after.
-$ Log in successful! Please run eclipse again in your terminal.
 ```
 
-#### Usage
+### Usage
 
 You can access Eclipse's menu by running `eclipse` in your terminal. There are also simple shortcuts that you can use to interact with the CLI.
 
-##### Initialize a config file
+#### Config files
 
-Eclipse config files (`.eclipserc`) tell Eclipse which project your repository belongs to. You can initialize a config file via the menu, selecting the `Initialize a config file` option.
+Eclipse config files (`.eclipserc`) tell Eclipse which project your repository belongs to. You can have Eclipse create a config file using the CLI menu, by selecting a project and then the `Initialize a config file` option.
 
 Eclipse will create a config file in the current working directory with the identifier of the project you selected.
 
 Once the config file is created, you will be able to use the CLI to inject environment variables into your code's execution context.
 
-##### Inject environment variables
+#### Environment injection
 
 Eclipse can inject environment variables into any execution context. Use the following syntax:
 
 ```console
-eclipse inject <classifiers> <command>
+$ eclipse inject/i <classifiers> <command>
 ```
 
 -   `<classifier>` can be `all` or a comma-separated list of secret classifiers that you wish to inject (e.g. `web,staging`)
@@ -73,15 +72,18 @@ SOME_OTHER_SECRET=some_other_value
 You can also filter the injected secrets by passing in one or more comma-separated classifiers:
 
 ```console
-foo@bar:~$ eclipse inject web,staging node
-> console.log(process.env)
-STAGING_SECRET=staging_value
-OTHER_STAGING_SECRET=other_staging_value
+foo@bar:~$ eclipse i web,staging npm start
 ```
 
-##### List all project secrets
+#### List all project secrets
 
-You can see all project secrets and their values on your console using the CLI menu. If you are on a directory with a config file, you can also run:
+You can list project secrets and their values on your console using the CLI menu. If you are on a directory with a config file, you can also run:
+
+```console
+$ eclipse list/ls
+```
+
+For example:
 
 ```console
 foo@bar:~$ eclipse ls
@@ -89,41 +91,48 @@ MY_SECRET=some_value
 MY_OTHER_SECRET=some_other_value
 ```
 
-##### Add and remove secrets
+#### Managing secrets
 
-To add or remove secrets, you can select the respective option from the CLI menu, or if you are on a directory with a config file, you can use the following shortcuts:
+You can add or remove secrets on the [Eclipse webapp](https://eclipsejs.io) or from the CLI menu. If you are on a directory with a config file, you can also use the following shortcuts:
 
-Adding a secret:
+##### Adding a secret
 
 ```console
-foo@bar:~$ eclipse add <secretname> <secretvalue> <classifiers>
-$ Secret <secretname> has been created.
+$ eclipse add/a <secretname> <secretvalue> <classifiers>
 ```
 
-Removing a secret:
+For example, creating a secret with a single classifier:
 
 ```console
-foo@bar:~$ eclipse rm <secretname>
+foo@bar:~$ eclipse add MY_TEST_SECRET MY_TEST_VALUE web
+$ Secret MY_TEST_SECRET has been created under project MERN project.
+```
+
+##### Creating a secret with multiple classifiers:
+
+```console
+foo@bar:~$ eclipse a MY_TEST_SECRET MY_TEST_VALUE web,staging
+$ Secret MY_TEST_SECRET has been created under project MERN project.
+```
+
+##### Removing a secret:
+
+```console
+$ eclipse remove/rm <secretname> <optional - classifiers>
+```
+
+You can optionally pass classifiers when removing a secret. This is helpful if you have multiple versions of the same secret (e.g. for production and staging).
+
+For example:
+
+```console
+foo@bar:~$ eclipse rm MY_TEST_SECRET staging
 ? Are you sure? This cannot be undone. (Use arrow keys)
 ❯ Confirm
   Cancel
-$ Secret deleted.
+$ Secret MY_TEST_SECRET deleted.
 ```
 
-##### Printing to env file
+#### Printing to env file
 
 You can optionally print project secrets to a `.env` file if you do not wish to use Eclipse's environment injection feature. You can do this through the CLI menu.
-
-If you are on a directory with a config file, you can also run:
-
-```console
-foo@bar:~$ eclipse print .env
-$ Environment file printed to working directory.
-```
-
-You can optionally pass in a different name for the environment file:
-
-```console
-foo@bar:~$ eclipse print .env.test
-$ Environment file printed to working directory.
-```

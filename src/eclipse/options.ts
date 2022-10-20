@@ -15,6 +15,10 @@ export class Options {
                 'i, inject <classifiers> <command>',
                 'Inject project secrets into an execution context. Classifiers can be "all" or comma-separated values.'
             )
+            .option(
+                'a, add <secretname> <secretvalue> <classifiers>',
+                'Create a secret under the working project directory. Classifiers must be comma-separated.'
+            )
             .addHelpText(
                 'after',
                 `
@@ -29,7 +33,15 @@ export class Options {
 
             Inject secrets that have the staging and web classifier unto a build:
             $ eclipse i staging,web npm start
+
+            Examples - creating secrets:
+
+            Creating a secret with a single classifier:
+            $ eclipse add my_secret "SECRET_HASH_123" production  
             
+            Creating a secret with multiple classifiers:
+            $ eclipse add my_secret "SECRET_HASH_345" backend,production
+
             `
             )
             .outputHelp();

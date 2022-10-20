@@ -25,9 +25,9 @@ export class Projects {
             case 'view':
                 return this.viewProjectSecrets(project);
             case 'add':
-                return this.secrets.addSecret(project);
+                return this.secrets.addSecretFromMenu(project);
             case 'remove':
-                return this.secrets.removeSecret(project);
+                return this.secrets.removeSecretFromMenu(project);
             case 'print':
                 return this.printSecrets(project);
             case 'createConfig':
@@ -129,7 +129,7 @@ export class Projects {
         return this.projectConfig.checkIfExists();
     }
 
-    public async getCurrentProjectSecrets(classifiers?: string[]) {
+    public async getCurrentProject(): Promise<Project | undefined> {
         const configData = await this.projectConfig.readConfigFile();
 
         if (!configData['PROJECT']) {
@@ -139,7 +139,14 @@ export class Projects {
             return;
         }
 
-        const project = await this.getProject(configData['PROJECT']);
+        return this.getProject(configData['PROJECT']);
+    }
+
+    public async getCurrentProjectSecrets(classifiers?: string[]) {
+        const project = await this.getCurrentProject();
+
+        if (!project) return;
+
         const secrets = await this.secrets.getSecrets(project, classifiers);
 
         if (!secrets) {

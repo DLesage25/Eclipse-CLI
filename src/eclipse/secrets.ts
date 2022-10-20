@@ -12,9 +12,27 @@ export class Secrets {
         @inject('Logger') private logger: Logger
     ) {}
 
-    public async addSecret(project: Project) {
+    public async addSecretFromMenu(project: Project) {
         const { name, value, rawClassifiers } = await createSecretPrompt();
-        const classifiers = rawClassifiers.split(' ');
+        return this.addSecret(project, name, value, rawClassifiers);
+    }
+
+    public async removeSecretFromMenu(project: Project) {
+        const { secret, confirm } = await deleteSecretPrompt(project.secrets);
+        if (!confirm) {
+            this.logger.message('Aborted.');
+            return;
+        }
+        return this.removeSecret(secret);
+    }
+
+    public async addSecret(
+        project: Project,
+        name: string,
+        value: string,
+        rawClassifiers: string
+    ) {
+        const classifiers = rawClassifiers.split(',').filter((i) => i !== '');
         const { name: createdName } = await this._api.createSecret({
             projectId: project._id,
             name,
@@ -46,11 +64,7 @@ export class Secrets {
         return secretsWithName;
     }
 
-    public async removeSecret(project: Project) {
-        const { secretId, confirm } = await deleteSecretPrompt(project.secrets);
-        if (!confirm) {
-            this.logger.message('Cancelled.');
-        }
-        return this._api.deleteSecret(secretId);
+    public async removeSecret(secret: { _id: string; name: string }) {
+        return this._api.deleteSecret(secret._id, secret.name);
     }
 }

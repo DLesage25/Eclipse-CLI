@@ -5,6 +5,7 @@ import * as packageJson from '../../package.json';
 import { Options } from './options';
 import { PROJECT_ACTIONS } from './constants/commands';
 import { Auth } from './auth/auth';
+import { Secrets } from './secrets';
 
 @injectable()
 export class Commands {
@@ -12,7 +13,8 @@ export class Commands {
         @inject('Options') private options: Options,
         @inject('Logger') private logger: Logger,
         @inject('Projects') private projects: Projects,
-        @inject('Auth') private auth: Auth
+        @inject('Auth') private auth: Auth,
+        @inject('Secrets') private secrets: Secrets
     ) {}
 
     public async processCommand(
@@ -67,10 +69,36 @@ export class Commands {
             case 'inject':
             case 'i':
                 return this.processInjectCommand(commandArgs);
+            case 'add':
+            case 'a':
+                return this.processAddCommand(commandArgs);
             default:
                 this.logger.warning('Command not recognized');
                 return false;
         }
+    }
+
+    private async processAddCommand(
+        postArguments: Array<string>
+    ): Promise<boolean> {
+        const [secretName, secretValue, rawClassifiers] = postArguments;
+
+        const project = await this.projects.getCurrentProject();
+
+        if (!project) {
+            this.logger.error(
+                'Could not fetch current project. Please try again.'
+            );
+            return false;
+        }
+
+        await this.secrets.addSecret(
+            project,
+            secretName,
+            secretValue,
+            rawClassifiers
+        );
+        return true;
     }
 
     private async processInjectCommand(
