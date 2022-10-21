@@ -20,14 +20,21 @@ export class Options {
                 'Create a secret under the working project directory. Classifiers must be comma-separated.'
             )
             .option(
+                'rm, remove <secretname> <classifiers>',
+                'Delete a secret under the working project directory. Classifiers must be comma-separated.'
+            )
+            .option(
                 'ls, list <classifiers - optional>',
                 'Show project secrets and their values on the console. Classifiers must be comma-separated.'
             )
             .addHelpText(
                 'after',
                 `
-            
-            Examples - secret injection: 
+            EXAMPLES
+
+            +=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+            Secret injection: 
 
             Injecting all secrets unto a Node REPL:
             $ eclipse inject all node
@@ -38,13 +45,27 @@ export class Options {
             Inject secrets that have the staging and web classifier unto a build:
             $ eclipse i staging,web npm start
 
-            Examples - creating secrets:
+            +=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+            Creating secrets:
 
             Creating a secret with a single classifier:
             $ eclipse add my_secret "SECRET_HASH_123" production  
             
             Creating a secret with multiple classifiers:
             $ eclipse add my_secret "SECRET_HASH_345" backend,production
+
+            +=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+            Deleting secrets:
+
+            Deleting a secret without classifiers:
+            $ eclipse rm my_secret
+
+            Deleting a secret with classifiers:
+            $ eclipse rm my_secret web,staging
+
+            +=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
             Examples - listing secrets:
 

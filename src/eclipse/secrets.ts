@@ -3,6 +3,7 @@ import { API } from './api';
 import createSecretPrompt from './prompts/createSecret.prompt';
 import deleteSecretPrompt from './prompts/deleteSecret.prompt';
 import { Project } from './types/Project.type';
+import { Secret } from './types/Secret.type';
 import { Logger } from './utils/logger';
 
 @injectable()
@@ -45,7 +46,11 @@ export class Secrets {
         return;
     }
 
-    public async getSecrets(project: Project, classifiers?: Array<string>) {
+    public async getPartialSecrets(
+        project: Project,
+        classifiers?: Array<string>,
+        includeAllProperties?: boolean
+    ): Promise<void | { [key: string]: string }> {
         const secrets = await this._api.getSecrets(project._id, classifiers);
 
         if (!secrets.length) {
@@ -56,7 +61,31 @@ export class Secrets {
             (prev, secret) => {
                 return {
                     ...prev,
-                    [secret.name]: secret.value,
+                    [secret.name]: includeAllProperties
+                        ? { ...secret }
+                        : secret.value,
+                };
+            },
+            {}
+        );
+        return secretsWithName;
+    }
+
+    public async getFullSecrets(
+        project: Project,
+        classifiers?: Array<string>
+    ): Promise<void | { [key: string]: Secret }> {
+        const secrets = await this._api.getSecrets(project._id, classifiers);
+
+        if (!secrets.length) {
+            return;
+        }
+
+        const secretsWithName: { [key: string]: Secret } = secrets.reduce(
+            (prev, secret) => {
+                return {
+                    ...prev,
+                    [secret.name]: { ...secret },
                 };
             },
             {}
