@@ -19,8 +19,7 @@ export class API {
         this._http = axios.create({
             baseURL: process.env.ECLIPSE_API_URL,
             headers: {
-                Authorization: '',
-                'X-ECLIPSE_CLI_KEY': process.env.ECLIPSE_CLI_KEY as string,
+                Authorization: `Bearer ${process.env.ECLIPSE_CLI_KEY}`,
             },
         });
     }
