@@ -1,4 +1,4 @@
-export const PROJECT_ACTIONS = {
+export const PROJECT_COMMANDS = {
     list: true,
     ls: true,
     add: true,

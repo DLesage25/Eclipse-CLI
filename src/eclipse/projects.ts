@@ -82,7 +82,10 @@ export class Projects {
         project: Project,
         classifiers?: Array<string>
     ) {
-        const secrets = await this.secrets.getSecrets(project, classifiers);
+        const secrets = await this.secrets.getPartialSecrets(
+            project,
+            classifiers
+        );
 
         if (!secrets) {
             this.logger.warning(`No secrets found for project ${project.name}`);
@@ -95,7 +98,7 @@ export class Projects {
     }
 
     private async printSecrets(project: Project) {
-        const secrets = await this.secrets.getSecrets(project);
+        const secrets = await this.secrets.getPartialSecrets(project);
 
         if (!secrets) {
             this.logger.warning(`No secrets found for project ${project.name}`);
@@ -150,7 +153,10 @@ export class Projects {
 
         if (!project) return;
 
-        const secrets = await this.secrets.getSecrets(project, classifiers);
+        const secrets = await this.secrets.getPartialSecrets(
+            project,
+            classifiers
+        );
 
         if (!secrets) {
             this.logger.warning(`No secrets found for project ${project.name}`);

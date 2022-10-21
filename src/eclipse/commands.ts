@@ -1,11 +1,13 @@
+import * as packageJson from '../../package.json';
+import confirmPrompt from './prompts/confirm.prompt';
 import { inject, injectable } from 'inversify';
 import { Projects } from './projects';
 import { Logger } from './utils/logger';
-import * as packageJson from '../../package.json';
 import { Options } from './options';
-import { PROJECT_ACTIONS } from './constants/commands';
 import { Auth } from './auth/auth';
 import { Secrets } from './secrets';
+import { Project } from './types/Project.type';
+import { PROJECT_COMMANDS } from './constants/projectCommands';
 
 @injectable()
 export class Commands {
@@ -23,7 +25,7 @@ export class Commands {
     ) {
         const [coreCommand] = postArguments;
 
-        if (PROJECT_ACTIONS[coreCommand]) {
+        if (PROJECT_COMMANDS[coreCommand]) {
             if (!isInProjectDirectory) {
                 this.logger.warning(
                     'You need to be on a project directory to use this command.'
@@ -75,10 +77,68 @@ export class Commands {
             case 'list':
             case 'ls':
                 return this.processListCommand(commandArgs);
+            case 'remove':
+            case 'rm':
+                return this.processRemoveCommand(commandArgs);
             default:
                 this.logger.warning('Command not recognized');
                 return false;
         }
+    }
+
+    private async processRemoveCommand(
+        postArguments: Array<string>
+    ): Promise<boolean> {
+        const [secretName, rawClassifiers] = postArguments;
+        const classifiers = rawClassifiers
+            ? rawClassifiers.split(',').filter((i) => i !== '')
+            : undefined;
+
+        const project = await this.getCurrentProject();
+
+        if (!project) {
+            return false;
+        }
+
+        const secrets = await this.secrets.getFullSecrets(project, classifiers);
+
+        if (!secrets) {
+            return false;
+        }
+
+        const secret = secrets[secretName];
+
+        if (!secret) {
+            this.logger.error(
+                `Secret ${secretName} not found under project ${project.name}`
+            );
+            return false;
+        }
+
+        const { confirm } = await confirmPrompt(
+            'This action cannot be undone. Please confirm deletion:'
+        );
+
+        if (!confirm) {
+            this.logger.message('Aborted.');
+            return false;
+        }
+
+        await this.secrets.removeSecret(secret);
+
+        return true;
+    }
+
+    private async getCurrentProject(): Promise<Project | null> {
+        const project = await this.projects.getCurrentProject();
+
+        if (!project) {
+            this.logger.error(
+                'Could not fetch current project. Please try again.'
+            );
+            return null;
+        }
+        return project;
     }
 
     private async processListCommand(
@@ -89,12 +149,9 @@ export class Commands {
             ? rawClassifiers.split(',').filter((i) => i !== '')
             : undefined;
 
-        const project = await this.projects.getCurrentProject();
+        const project = await this.getCurrentProject();
 
         if (!project) {
-            this.logger.error(
-                'Could not fetch current project. Please try again.'
-            );
             return false;
         }
 
@@ -108,12 +165,9 @@ export class Commands {
     ): Promise<boolean> {
         const [secretName, secretValue, rawClassifiers] = postArguments;
 
-        const project = await this.projects.getCurrentProject();
+        const project = await this.getCurrentProject();
 
         if (!project) {
-            this.logger.error(
-                'Could not fetch current project. Please try again.'
-            );
             return false;
         }
 

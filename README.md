@@ -129,7 +129,7 @@ $ Secret MY_TEST_SECRET has been created under project MERN project.
 $ eclipse remove/rm <secretname> <optional - classifiers>
 ```
 
-You can optionally pass classifiers when removing a secret. This is helpful if you have multiple versions of the same secret (e.g. for production and staging).
+You can optionally pass classifiers when removing a secret. Do this if you have multiple versions of the same secret (e.g. for production and staging).
 
 For example:
 
