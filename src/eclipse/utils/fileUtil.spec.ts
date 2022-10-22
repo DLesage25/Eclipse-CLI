@@ -14,6 +14,7 @@ describe('fileUtil', () => {
         beforeEach(() => {
             jest.resetAllMocks();
             jest.restoreAllMocks();
+            jest.spyOn(console, 'error').mockImplementation(() => true);
         });
         it('should return true if file found', async () => {
             fs.stat = jest.fn().mockReturnValueOnce(true);
@@ -30,6 +31,17 @@ describe('fileUtil', () => {
 
             const result = await fileUtil.find();
             expect(fileUtil.find).toHaveBeenCalled();
+            expect(result).toBeFalsy();
+        });
+
+        it('should return false if exception raised', async () => {
+            fs.stat = jest.fn().mockImplementationOnce(() => {
+                throw new Error('test');
+            });
+            jest.spyOn(fs, 'stat');
+
+            const result = await fileUtil.find();
+            expect(fs.stat).toHaveBeenCalled();
             expect(result).toBeFalsy();
         });
     });
@@ -140,7 +152,7 @@ describe('fileUtil', () => {
         });
 
         it('should return empty object if error', async () => {
-            fs.readFile = jest.fn().mockImplementationOnce(() => {
+            jest.spyOn(fileUtil, 'read').mockImplementationOnce(() => {
                 throw new Error('test');
             });
 
@@ -180,23 +192,17 @@ describe('fileUtil', () => {
         });
 
         it('should return false if error', async () => {
-            fs.readFile = jest.fn().mockResolvedValueOnce('test=true');
-            fs.writeFile = jest.fn().mockImplementationOnce(() => {
+            jest.spyOn(fileUtil, 'read').mockImplementationOnce(() => {
                 throw new Error('test');
             });
 
             jest.spyOn(fileUtil, 'read');
-            jest.spyOn(fileUtil, 'writeFile');
 
             const result = await fileUtil.replaceOnFile({
                 test: 'false',
                 test2: 'true',
             });
-            expect(fs.readFile).toHaveBeenCalled();
-            expect(fs.writeFile).toHaveBeenCalled();
-            expect(fileUtil.writeFile).toHaveBeenCalledWith(
-                'test=false\ntest2=true\n'
-            );
+            expect(fileUtil.read).toHaveBeenCalled();
             expect(result).toBeFalsy();
         });
     });
