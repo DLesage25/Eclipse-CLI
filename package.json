@@ -14,7 +14,8 @@
         "global": "sudo npm i -g && eclipse",
         "reset": "rm -rf ./node_modules ./package-lock.json ./lib && npm install",
         "lint": "npx eslint .",
-        "test": "jest"
+        "test": "jest",
+        "test:cov": "jest --coverage"
     },
     "typeCoverage": {
         "minCoverage": 90
