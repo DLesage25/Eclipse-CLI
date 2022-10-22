@@ -2,19 +2,12 @@
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
-        "baseUrl": "./",
-        "lib": [
-            "dom",
-            "es5",
-            "es2015",
-            "es2016",
-            "es2017"
-        ],     
-        "outDir": "lib",         
-        "rootDir": "src",
+        "baseUrl": "./src",
+        "lib": ["dom", "es5", "es2015", "es2016", "es2017"],
+        "outDir": "lib",
         "jsx": "react",
         "importHelpers": true,
-        "declaration": true,     
+        "declaration": true,
         "downlevelIteration": true,
         "strict": true,
         // "noUnusedLocals": true,
@@ -31,4 +24,3 @@
         "noImplicitAny": true
     }
 }
-  

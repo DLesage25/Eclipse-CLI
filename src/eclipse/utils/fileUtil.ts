@@ -86,7 +86,9 @@ export const fileNotationToObject = <T>(fileData: string): T => {
 
     return keyValArray.reduce((prev, current) => {
         const keyVal = current.split('=');
-        return { ...prev, [keyVal[0]]: keyVal[1] };
+        const value = isNaN(+keyVal[1]) ? keyVal[1] : +keyVal[1];
+
+        return { ...prev, [keyVal[0]]: value };
     }, {}) as T;
 };
 

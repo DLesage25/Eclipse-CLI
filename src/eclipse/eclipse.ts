@@ -6,7 +6,7 @@ import { Auth } from './auth/auth';
 import { Logger } from './utils/logger';
 import { API } from './api';
 import { Projects } from './projects';
-import { CoreConfigModule } from './coreConfig';
+import { CoreConfigModule } from './coreConfig/coreConfig';
 import { Commands } from './commands';
 import mainMenuPrompt from './prompts/mainMenu.prompt';
 

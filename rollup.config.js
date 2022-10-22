@@ -9,6 +9,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import { terser } from 'rollup-plugin-terser';
 
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -24,7 +25,11 @@ export default {
             jsnext: true,
             main: true,
         }),
-        tsConfig({ module: 'ESNext' }),
+        tsConfig({
+            module: 'ESNext',
+            tsconfig: path.resolve('./', 'tsconfig.build.json'),
+            exclude: ['**/mocks', '**/*.spec.ts'],
+        }),
         jsonPlugin(),
         replace({
             'process.env.ECLIPSE_API_URL': JSON.stringify(

@@ -1,7 +1,7 @@
 import axios, { Axios } from 'axios';
 import { inject, injectable } from 'inversify';
 import { Auth } from './auth/auth';
-import { CoreConfigModule } from './coreConfig';
+import { CoreConfigModule } from './coreConfig/coreConfig';
 import { CreateSecretDto } from './dtos/createSecret.dto';
 import { ApiConfig } from './types/CoreConfig.type';
 import { Project } from './types/Project.type';

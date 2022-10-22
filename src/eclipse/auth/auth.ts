@@ -6,9 +6,9 @@ import open from 'open';
 import axios from 'axios';
 import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
-import { KeyChain } from '../keychain';
+import { KeyChain } from '../keychain/keychain';
 import { AuthConfig } from '../types/AuthConfig.type';
-import { CoreConfigModule } from '../coreConfig';
+import { CoreConfigModule } from '../coreConfig/coreConfig';
 
 const requestUserToken = (
     codeVerifier: string,
