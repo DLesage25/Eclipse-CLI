@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { promises as fs } from 'fs';
 
 interface KeyValues {
-    [key: string]: string;
+    [key: string]: string | number;
 }
 
 @injectable()
