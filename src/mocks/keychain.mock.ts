@@ -3,7 +3,7 @@ import { KeyChain } from '../eclipse/keychain/keychain';
 
 @injectable()
 export class KeyChainMock implements KeyChain {
-    public async getKey(): Promise<string | null> {
+    public async getKey(name: string, account: string): Promise<string | null> {
         return '';
     }
     public async setKey(name: string, account: string, value: string) {

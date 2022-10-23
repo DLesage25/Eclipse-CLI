@@ -10,7 +10,7 @@ import { KeyChain } from '../keychain/keychain';
 import { AuthConfig } from '../types/AuthConfig.type';
 import { CoreConfigModule } from '../coreConfig/coreConfig';
 
-const requestUserToken = (
+export const requestUserToken = (
     codeVerifier: string,
     code: string,
     serverConfig: ServerConfig

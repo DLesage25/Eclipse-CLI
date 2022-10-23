@@ -21,10 +21,10 @@ describe('CoreConfigModule', () => {
     const kcMock = new KeyChainMock();
     const coreconfig = new CoreConfigModule(kcMock);
 
-    beforeEach(() => {
-        jest.resetAllMocks();
-    });
     describe('get', () => {
+        beforeEach(() => {
+            jest.resetAllMocks();
+        });
         it('should retrieve the core config and return it as an object', async () => {
             kcMock.getKey = jest.fn().mockReturnValueOnce(fileNotationConfig);
             const result = await coreconfig.get();
@@ -41,6 +41,9 @@ describe('CoreConfigModule', () => {
     });
 
     describe('set', () => {
+        beforeEach(() => {
+            jest.resetAllMocks();
+        });
         it('should convert to file format and store on keychain', async () => {
             kcMock.setKey = jest.fn();
             await coreconfig.set(coreConfig);
