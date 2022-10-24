@@ -8,6 +8,6 @@
     },
     "root": true,
     "rules": {
-        "@typescript-eslint/ban-ts-comment": "warning"
+        "@typescript-eslint/ban-ts-comment": 1
     }
 }
