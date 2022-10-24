@@ -1,10 +1,13 @@
 import 'reflect-metadata';
+import http from 'http';
+import url, { Url } from 'url';
+
 import { CoreConfigMock } from '../../mocks/coreConfig.mock';
 import { LoggerMock } from '../../mocks/logger.mock';
 import { KeyChainMock } from '../../mocks/keychain.mock';
-import { Auth, requestUserToken } from './auth';
+import { Auth } from './auth';
 import { AuthConfig } from '../types/AuthConfig.type';
-import axios from 'axios';
+
 const authConfig: AuthConfig = {
     access_token: 'accesstoken',
     expiration_date: 1234,
@@ -13,11 +16,14 @@ const authConfig: AuthConfig = {
 const fileNotationAuthConfig =
     'access_token=accesstoken\nexpiration_date=1234\n';
 
-jest.mock('axios', () => async () => ({
-    data: {
-        access_token: 'accesstoken',
-        expires_in: 1234,
-    },
+const mockOpen = jest.fn();
+jest.mock('open', () => () => mockOpen());
+
+const mockRequestUserToken = jest.fn();
+jest.mock('./authUtils', () => ({
+    requestUserToken: () => mockRequestUserToken(),
+    base64URLEncode: jest.fn(),
+    sha256: jest.fn(),
 }));
 
 describe('Auth', () => {
@@ -100,10 +106,9 @@ describe('Auth', () => {
             const createCodeChallengeSpy = jest
                 .spyOn(Auth.prototype as any, 'createCodeChallenge')
                 .mockReturnValueOnce('codechallenge');
-            const createAuthServerSpy = jest.spyOn(
-                Auth.prototype as any,
-                'createAuthServer'
-            );
+            const createAuthServerSpy = jest
+                .spyOn(Auth.prototype as any, 'createAuthServer')
+                .mockImplementation(() => jest.fn());
             const constructAuthUrlSpy = jest.spyOn(
                 Auth.prototype as any,
                 'constructAuthUrl'
@@ -162,33 +167,160 @@ describe('Auth', () => {
         });
     });
 
+    describe('openAuthPage', () => {
+        beforeEach(() => {
+            jest.resetAllMocks();
+            jest.restoreAllMocks();
+        });
+
+        it('should open a browser page for authentication', async () => {
+            await auth['openAuthPage']('url');
+
+            expect(mockOpen).toHaveBeenCalled();
+        });
+
+        it('should log exceptions raised when opening browser page', async () => {
+            mockOpen.mockImplementationOnce(() => {
+                throw new Error('error');
+            });
+            jest.spyOn(loggerMock, 'error');
+
+            await auth['openAuthPage']('url');
+
+            expect(mockOpen).toHaveBeenCalled();
+            expect(loggerMock.error).toHaveBeenCalled();
+        });
+    });
+
+    describe('handleAuthResponse', () => {
+        beforeEach(() => {
+            jest.resetAllMocks();
+            jest.restoreAllMocks();
+        });
+
+        const codeVerifier = 'codeverifier';
+        const kc = new KeyChainMock();
+        const serverConfig = {
+            ECLIPSE_AUTH_DOMAIN: 'test',
+            ECLIPSE_AUTH_CLIENT_ID: 'test',
+            ECLIPSE_AUTH_CALLBACK_URL: 'test',
+            ECLIPSE_AUTH_SERVER_PORT: 123,
+        };
+
+        it('should return early if no url is included on the request', async () => {
+            const req = {} as http.IncomingMessage;
+            const res = {} as http.ServerResponse;
+            await auth['handleAuthResponse'](
+                codeVerifier,
+                kc,
+                loggerMock,
+                serverConfig
+            )(req, res);
+            jest.spyOn(url, 'parse');
+
+            expect(url.parse).not.toHaveBeenCalled();
+        });
+
+        it('should return early if no code and state are included on the parsed url', async () => {
+            const req = {
+                url: 'test',
+            } as http.IncomingMessage;
+
+            const resWrite = jest.fn();
+            const res = {
+                write: resWrite,
+            } as unknown as http.ServerResponse;
+
+            const urlQuery = {
+                query: {
+                    error: 'error',
+                    error_description: 'desc',
+                },
+            };
+
+            jest.spyOn(url, 'parse').mockReturnValueOnce(
+                urlQuery as unknown as Url
+            );
+
+            await auth['handleAuthResponse'](
+                codeVerifier,
+                kc,
+                loggerMock,
+                serverConfig
+            )(req, res);
+
+            expect(url.parse).toHaveBeenCalled();
+            expect(resWrite).toHaveBeenCalledWith(`
+            <html>
+            <body>
+                <h1>LOGIN FAILED</h1>
+                <div>${'error'}</div>
+                <div>${'desc'}
+            </body>
+            </html>
+            `);
+        });
+
+        it('should render success page and store auth config to keychain if code and state on url', async () => {
+            const req = {
+                url: 'test',
+            } as http.IncomingMessage;
+
+            const resWrite = jest.fn();
+            const res = {
+                write: resWrite,
+            } as unknown as http.ServerResponse;
+
+            const urlQuery = {
+                query: {
+                    code: 'code',
+                    state: 'state',
+                },
+            };
+
+            jest.spyOn(url, 'parse').mockReturnValueOnce(
+                urlQuery as unknown as Url
+            );
+            jest.spyOn(kc, 'setKey');
+
+            mockRequestUserToken.mockResolvedValueOnce({
+                access_token: 'token',
+                expires_in: 1,
+            });
+
+            const expiration_date = (Date.now() + 1 * 1000).toString();
+
+            await auth['handleAuthResponse'](
+                codeVerifier,
+                kc,
+                loggerMock,
+                serverConfig
+            )(req, res);
+
+            expect(url.parse).toHaveBeenCalled();
+            expect(resWrite).toHaveBeenCalledWith(`
+            <html>
+            <body>
+                <h1>LOGIN SUCCEEDED</h1>
+                <p>You can close this browser window and go back to your terminal.</p>
+            </body>
+            </html>
+            `);
+            expect(mockRequestUserToken).toHaveBeenCalled();
+            expect(kc.setKey).toHaveBeenCalledWith(
+                'eclipse',
+                'auth',
+                `access_token=token\nexpiration_date=${expiration_date}\n`
+            );
+        });
+    });
+
     describe('logout', () => {
         it('should delete core config', async () => {
             jest.spyOn(kcMock, 'deleteKey');
 
             await auth.logout();
             expect(kcMock.deleteKey).toHaveBeenCalledWith('eclipse', 'auth');
-        });
-    });
-
-    describe('requestUserToken', () => {
-        const serverConfig = {
-            ECLIPSE_AUTH_DOMAIN: 'ECLIPSE_AUTH_DOMAIN',
-            ECLIPSE_AUTH_CLIENT_ID: 'ECLIPSE_AUTH_CLIENT_ID',
-            ECLIPSE_AUTH_CALLBACK_URL: 'ECLIPSE_AUTH_CALLBACK_URL',
-            ECLIPSE_AUTH_SERVER_PORT: 1234,
-        };
-        it('should POST to auth server and return auth config', async () => {
-            const result = await requestUserToken(
-                'codeverifier',
-                'code',
-                serverConfig
-            );
-
-            expect(result).toEqual({
-                access_token: 'accesstoken',
-                expires_in: 1234,
-            });
         });
     });
 });
