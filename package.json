@@ -15,7 +15,7 @@
         "reset": "rm -rf ./node_modules ./package-lock.json ./lib && npm install",
         "lint": "npx eslint .",
         "test": "jest --runInBand --detectOpenHandles --forceExit",
-        "test:cov": "jest --coverage"
+        "test:cov": "jest --coverage --runInBand --detectOpenHandles --forceExit"
     },
     "typeCoverage": {
         "minCoverage": 90
