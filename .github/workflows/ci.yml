@@ -57,4 +57,18 @@ jobs:
               run: npm ci
 
             - name: Run tests
-              run: npm run test
+              run: npm run test:cov
+
+            - name: Install coverage badge dep
+              run: npm i coverage-badges-cli -g
+
+            - name: Generate coverage badge
+              run: coverage-badges --source=coverage/coverage-summary.json --output=badges/coverage.svg
+
+            - name: Push changes to remote
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git add ./badges/
+                  git commit -m "adding coverage badge"
+                  git push

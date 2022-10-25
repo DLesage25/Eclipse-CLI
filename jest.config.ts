@@ -47,12 +47,12 @@ export default {
     coverageProvider: 'v8',
 
     // A list of reporter names that Jest uses when writing coverage reports
-    // coverageReporters: [
-    //   "json",
-    //   "text",
-    //   "lcov",
-    //   "clover"
-    // ],
+    coverageReporters: [
+        ['json-summary', { file: 'coverage-summary.json' }],
+        'text',
+        //   "lcov",
+        //   "clover"
+    ],
 
     // An object that configures minimum threshold enforcement for coverage results
     // coverageThreshold: undefined,
@@ -119,7 +119,7 @@ export default {
     // projects: undefined,
 
     // Use this configuration option to add custom reporters to Jest
-    // reporters: undefined,
+    reporters: ['default'],
 
     // Automatically reset mock state before every test
     // resetMocks: false,
