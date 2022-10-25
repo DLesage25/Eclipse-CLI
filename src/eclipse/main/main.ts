@@ -2,17 +2,17 @@ import 'reflect-metadata';
 import minimist from 'minimist';
 import { inject, injectable } from 'inversify';
 
-import Auth from './auth';
-import API from './api';
-import CoreConfigModule from './coreConfig';
-import Projects from './projects';
+import Auth from '../auth';
+import API from '../api';
+import CoreConfigModule from '../coreConfig';
+import Projects from '../projects';
 
-import { Logger } from './utils/logger';
-import { Commands } from './commands';
-import mainMenuPrompt from './prompts/mainMenu.prompt';
+import { Logger } from '../utils/logger';
+import { Commands } from '../commands';
+import mainMenuPrompt from '../prompts/mainMenu.prompt';
 
 @injectable()
-export class Eclipse {
+export default class Main {
     public suppressError = false;
 
     constructor(
