@@ -1,10 +1,10 @@
+import { inject, injectable } from 'inversify';
 import * as packageJson from '../../package.json';
 import confirmPrompt from './prompts/confirm.prompt';
-import { inject, injectable } from 'inversify';
-import { Projects } from './projects';
+import Projects from './projects';
+import Auth from './auth';
 import { Logger } from './utils/logger';
 import { Options } from './options';
-import Auth from './auth';
 import { Secrets } from './secrets';
 import { Project } from './types/Project.type';
 import { PROJECT_COMMANDS } from './constants/projectCommands';

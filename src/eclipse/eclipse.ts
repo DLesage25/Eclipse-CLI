@@ -5,9 +5,9 @@ import { inject, injectable } from 'inversify';
 import Auth from './auth';
 import API from './api';
 import CoreConfigModule from './coreConfig';
+import Projects from './projects';
 
 import { Logger } from './utils/logger';
-import { Projects } from './projects';
 import { Commands } from './commands';
 import mainMenuPrompt from './prompts/mainMenu.prompt';
 
