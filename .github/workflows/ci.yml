@@ -75,6 +75,6 @@ jobs:
               with:
                   author_name: github-actions[bot]
                   author_email: 41898282+github-actions[bot]@users.noreply.github.com
-                  message: 'adding coverage badge'
+                  message: '[skip ci] adding coverage badge'
                   add: ./badges/
                   push: true
