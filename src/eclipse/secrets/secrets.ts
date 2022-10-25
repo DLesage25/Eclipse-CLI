@@ -1,13 +1,13 @@
 import { inject, injectable } from 'inversify';
-import API from './api';
-import createSecretPrompt from './prompts/createSecret.prompt';
-import deleteSecretPrompt from './prompts/deleteSecret.prompt';
-import { Project } from './types/Project.type';
-import { Secret } from './types/Secret.type';
-import { Logger } from './utils/logger';
+import API from '../api';
+import createSecretPrompt from '../prompts/createSecret.prompt';
+import deleteSecretPrompt from '../prompts/deleteSecret.prompt';
+import { Project } from '../types/Project.type';
+import { Secret } from '../types/Secret.type';
+import { Logger } from '../utils/logger';
 
 @injectable()
-export class Secrets {
+export default class Secrets {
     constructor(
         @inject('API') private _api: API,
         @inject('Logger') private logger: Logger

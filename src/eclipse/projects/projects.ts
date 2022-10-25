@@ -4,7 +4,7 @@ import Shell from '../shell';
 import ProjectConfig from '../projectConfig';
 import projectSelectionPrompt from '../prompts/projectSelection.prompt';
 import singleProjectActionPrompt from '../prompts/singleProjectAction.prompt';
-import { Secrets } from '../secrets';
+import Secrets from '../secrets';
 import { Project } from '../types/Project.type';
 import { FileUtil, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
