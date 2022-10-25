@@ -66,10 +66,11 @@ jobs:
             - name: Generate coverage badge
               run: coverage-badges --source=coverage/coverage-summary.json --output=badges/coverage.svg
 
-            - name: Push changes to remote
-              run: |
-                  git config --global user.name "github-actions[bot]"
-                  git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  git add ./badges/
-                  git commit -m "adding coverage badge"
-                  git push
+            - name: Push badge to remote
+              uses: EndBug/add-and-commit@v8
+              with:
+                  author_name: github-actions[bot]
+                  author_email: 41898282+github-actions[bot]@users.noreply.github.com
+                  message: 'adding coverage badge'
+                  add: ./badges/
+                  push: true
