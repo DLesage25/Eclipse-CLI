@@ -288,14 +288,13 @@ describe('Auth', () => {
                 expires_in: 1,
             });
 
-            const expiration_date = (Date.now() + 1 * 1000).toString();
-
             await auth['handleAuthResponse'](
                 codeVerifier,
                 kc,
                 loggerMock,
                 serverConfig
             )(req, res);
+            const expiration_date = (Date.now() + 1 * 1000).toString();
 
             expect(url.parse).toHaveBeenCalled();
             expect(resWrite).toHaveBeenCalledWith(`
