@@ -26,6 +26,7 @@ export default {
         '!**/*commands.ts',
         '!**/*options.ts',
         '!**/*types.ts',
+        '!**/*logger.ts',
     ],
 
     // The directory where Jest should output its coverage files
