@@ -1,9 +1,9 @@
 import { inject, injectable } from 'inversify';
-import { FileUtil } from './utils/fileUtil';
-import { Logger } from './utils/logger';
+import { FileUtil } from '../utils/fileUtil';
+import { Logger } from '../utils/logger';
 
 @injectable()
-export class ProjectConfig {
+export default class ProjectConfig {
     constructor(
         @inject('Logger') private logger: Logger,
         @inject('ConfigFile') private configFile: FileUtil
