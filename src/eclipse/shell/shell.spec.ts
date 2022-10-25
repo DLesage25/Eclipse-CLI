@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Shell } from './shell';
+import Shell from './shell';
 import { spawn } from 'child_process';
 
 jest.mock('child_process');
