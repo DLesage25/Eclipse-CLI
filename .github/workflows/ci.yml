@@ -48,6 +48,9 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v3
+              with:
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
+                  ref: ${{ github.event.pull_request.head.ref }}
 
             - name: Setup node
               uses: actions/setup-node@v3
@@ -73,4 +76,4 @@ jobs:
                   author_email: 41898282+github-actions[bot]@users.noreply.github.com
                   message: 'adding coverage badge'
                   add: ./badges/
-                  push: 'origin ${GITHUB_REF##*/}'
+                  push: true
