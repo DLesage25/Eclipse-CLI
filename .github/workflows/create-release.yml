@@ -30,8 +30,8 @@ jobs:
               run: npm ci
 
             # Tests
-            #- name: Run tests
-            #  run: yarn test
+            - name: Test
+              run: npm run test
 
             # Configure Git
             - name: Git configuration
