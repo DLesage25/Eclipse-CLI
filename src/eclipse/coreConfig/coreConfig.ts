@@ -1,10 +1,10 @@
 import { inject, injectable } from 'inversify';
-import { KeyChain } from '../keychain/keychain';
+import KeyChain from '../keychain';
 import { ApiConfig, CoreConfig } from '../types/CoreConfig.type';
 import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 
 @injectable()
-export class CoreConfigModule {
+export default class CoreConfigModule {
     constructor(@inject('KeyChain') private keychain: KeyChain) {}
 
     public async get(): Promise<CoreConfig | null> {

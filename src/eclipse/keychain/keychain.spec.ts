@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { KeyChain } from './keychain';
+import KeyChain from './keychain';
 import keytar from 'keytar';
 
 jest.mock('keytar');

@@ -6,14 +6,14 @@ import open from 'open';
 
 import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
-import { KeyChain } from '../keychain/keychain';
+import KeyChain from '../keychain';
 import { AuthConfig } from '../types/AuthConfig.type';
-import { CoreConfigModule } from '../coreConfig/coreConfig';
+import CoreConfigModule from '../coreConfig';
 import { base64URLEncode, requestUserToken, sha256 } from './authUtils';
 import { AuthUrlConfig, ServerConfig } from './auth.types';
 
 @injectable()
-export class Auth {
+export default class Auth {
     private codeVerifier: string;
     private authConfig: AuthConfig | null;
     constructor(

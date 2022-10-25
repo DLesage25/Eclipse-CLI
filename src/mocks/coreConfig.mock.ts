@@ -1,6 +1,5 @@
-import { KeyChain } from 'eclipse/keychain/keychain';
 import { ApiConfig, CoreConfig } from 'eclipse/types/CoreConfig.type';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 
 @injectable()
 export class CoreConfigMock {

@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import keytar from 'keytar';
 
 @injectable()
-export class KeyChain {
+export default class KeyChain {
     public async getKey(
         service: string,
         account: string

@@ -1,15 +1,17 @@
 import axios, { Axios } from 'axios';
 import { inject, injectable } from 'inversify';
-import { Auth } from './auth/auth';
-import { CoreConfigModule } from './coreConfig/coreConfig';
-import { CreateSecretDto } from './dtos/createSecret.dto';
-import { ApiConfig } from './types/CoreConfig.type';
-import { Project } from './types/Project.type';
-import { RevealedSecret } from './types/Secret.type';
-import { Logger } from './utils/logger';
+
+import Auth from '../auth/auth';
+import CoreConfigModule from '../coreConfig';
+
+import { CreateSecretDto } from '../dtos/createSecret.dto';
+import { ApiConfig } from '../types/CoreConfig.type';
+import { Project } from '../types/Project.type';
+import { RevealedSecret } from '../types/Secret.type';
+import { Logger } from '../utils/logger';
 
 @injectable()
-export class API {
+export default class API {
     private _http: Axios;
     constructor(
         @inject('Auth') private auth: Auth,
@@ -50,7 +52,7 @@ export class API {
     }
 
     public async getUser() {
-        return this._http.get('/users/').then((res) => res.data);
+        return this._http.get('/users').then((res) => res.data);
     }
 
     public async getProjects(projectId?: string): Promise<Project[]> {
@@ -63,7 +65,7 @@ export class API {
             : undefined;
 
         return this._http
-            .get('/projects/', opts)
+            .get('/projects', opts)
             .then((res) => {
                 return typeof res.data === 'string'
                     ? JSON.parse(res.data)

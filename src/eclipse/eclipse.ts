@@ -2,11 +2,12 @@ import 'reflect-metadata';
 import minimist from 'minimist';
 import { inject, injectable } from 'inversify';
 
-import { Auth } from './auth/auth';
+import Auth from './auth';
+import API from './api';
+import CoreConfigModule from './coreConfig';
+
 import { Logger } from './utils/logger';
-import { API } from './api';
 import { Projects } from './projects';
-import { CoreConfigModule } from './coreConfig/coreConfig';
 import { Commands } from './commands';
 import mainMenuPrompt from './prompts/mainMenu.prompt';
 

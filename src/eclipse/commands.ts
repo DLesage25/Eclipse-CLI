@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify';
 import { Projects } from './projects';
 import { Logger } from './utils/logger';
 import { Options } from './options';
-import { Auth } from './auth/auth';
+import Auth from './auth';
 import { Secrets } from './secrets';
 import { Project } from './types/Project.type';
 import { PROJECT_COMMANDS } from './constants/projectCommands';

@@ -5,7 +5,7 @@ import url, { Url } from 'url';
 import { CoreConfigMock } from '../../mocks/coreConfig.mock';
 import { LoggerMock } from '../../mocks/logger.mock';
 import { KeyChainMock } from '../../mocks/keychain.mock';
-import { Auth } from './auth';
+import Auth from './auth';
 import { AuthConfig } from '../types/AuthConfig.type';
 
 const authConfig: AuthConfig = {

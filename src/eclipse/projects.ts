@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
-import { API } from './api';
-import { Shell } from './shell/shell';
+import API from './api';
+import Shell from './shell';
 import { ProjectConfig } from './projectConfig';
 import projectSelectionPrompt from './prompts/projectSelection.prompt';
 import singleProjectActionPrompt from './prompts/singleProjectAction.prompt';

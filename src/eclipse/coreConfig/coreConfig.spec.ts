@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { KeyChainMock } from '../../mocks/keychain.mock';
 import { CoreConfig } from '../types/CoreConfig.type';
 
-import { CoreConfigModule } from './coreConfig';
+import CoreConfigModule from './coreConfig';
 
 jest.mock('keytar');
 

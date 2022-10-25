@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { spawn } from 'child_process';
 
 @injectable()
-export class Shell {
+export default class Shell {
     public initialize(
         coreProcess: string,
         processArgs: string[],
@@ -15,7 +15,7 @@ export class Shell {
         });
     }
 
-    private sanitizeEnv(env: { [key: string]: string | undefined }) {
+    public sanitizeEnv(env: { [key: string]: string | undefined }) {
         const unsanitizedEnv = {
             ...process.env,
             ...env,
