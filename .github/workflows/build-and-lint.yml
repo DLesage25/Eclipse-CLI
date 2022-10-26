@@ -4,7 +4,8 @@ on:
         branches: [main]
 
 jobs:
-    build-and-lint:
+    test-build-lint:
+        name: 'Test, build, and lint'
         runs-on: ubuntu-latest
         steps:
             # Checkout project repository
