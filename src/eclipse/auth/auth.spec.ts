@@ -282,6 +282,7 @@ describe('Auth', () => {
                 urlQuery as unknown as Url
             );
             jest.spyOn(kc, 'setKey');
+            jest.spyOn(Date, 'now').mockReturnValue(1111);
 
             mockRequestUserToken.mockResolvedValueOnce({
                 access_token: 'token',
@@ -294,7 +295,7 @@ describe('Auth', () => {
                 loggerMock,
                 serverConfig
             )(req, res);
-            const expiration_date = (Date.now() + 1 * 1000).toString();
+            const expiration_date = (1111 + 1 * 1000).toString();
 
             expect(url.parse).toHaveBeenCalled();
             expect(resWrite).toHaveBeenCalledWith(`
