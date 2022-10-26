@@ -16,10 +16,20 @@ describe('Shell', () => {
         it('should spawn a new child process', async () => {
             await shell.initialize('test', ['arg1', 'arg2'], { env1: 'test' });
 
+            const env = {
+                ...process.env,
+                env1: 'test',
+            };
+
+            //@ts-ignore
+            delete env.ECLIPSE_API_URL;
+            //@ts-ignore
+            delete env.ECLIPSE_CLI_KEY;
+
             expect(spawn).toHaveBeenCalledTimes(1);
             expect(spawn).toHaveBeenCalledWith('test', ['arg1', 'arg2'], {
                 stdio: 'inherit',
-                env: { ...process.env, env1: 'test' },
+                env,
             });
         });
     });
@@ -31,10 +41,17 @@ describe('Shell', () => {
                 env1: 'test',
             });
 
-            expect(result).toEqual({
+            const env = {
                 ...process.env,
                 env1: 'test',
-            });
+            };
+
+            //@ts-ignore
+            delete env.ECLIPSE_API_URL;
+            //@ts-ignore
+            delete env.ECLIPSE_CLI_KEY;
+
+            expect(result).toEqual(env);
         });
     });
 });
