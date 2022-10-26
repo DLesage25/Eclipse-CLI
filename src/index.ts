@@ -4,24 +4,26 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { Container } from 'inversify';
+
+import Main from './eclipse/main';
+import Auth from './eclipse/auth';
+import API from './eclipse/api';
+import KeyChain from './eclipse/keychain';
+import Shell from './eclipse/shell';
+import CoreConfigModule from './eclipse/coreConfig';
+import ProjectConfig from './eclipse/projectConfig';
+import Projects from './eclipse/projects';
+import Secrets from './eclipse/secrets';
+
 import { FileUtil } from './eclipse/utils/fileUtil';
-import { Eclipse } from './eclipse/eclipse';
 import { Options } from './eclipse/options';
-import { Auth } from './eclipse/auth/auth';
 import { Logger } from './eclipse/utils/logger';
-import { API } from './eclipse/api';
-import { Projects } from './eclipse/projects';
-import { Secrets } from './eclipse/secrets';
-import { KeyChain } from './eclipse/keychain';
-import { ProjectConfig } from './eclipse/projectConfig';
-import { Shell } from './eclipse/shell';
-import { CoreConfigModule } from './eclipse/coreConfig';
 import { Commands } from './eclipse/commands';
 
-export function index(): Eclipse {
+export function index(): Main {
     const container: Container = new Container();
 
-    container.bind<Eclipse>('Eclipse').to(Eclipse).inSingletonScope();
+    container.bind<Main>('Main').to(Main).inSingletonScope();
     container.bind<Options>('Options').to(Options).inSingletonScope();
     container.bind<Auth>('Auth').to(Auth).inRequestScope();
     container.bind<Logger>('Logger').to(Logger).inSingletonScope();
@@ -46,7 +48,7 @@ export function index(): Eclipse {
         .bind<FileUtil>('ConfigFile')
         .toDynamicValue(() => new FileUtil('./.eclipserc'));
 
-    return container.get<Eclipse>('Eclipse');
+    return container.get<Main>('Main');
 }
 
 index();

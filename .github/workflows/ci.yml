@@ -41,3 +41,40 @@ jobs:
 
             - name: Build bundle
               run: npm run build
+    test:
+        runs-on: ubuntu-22.04
+        name: Test
+        needs: [lint, build]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+              with:
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
+                  ref: ${{ github.event.pull_request.head.ref }}
+                  token: ${{ secrets.ACTION_TOKEN }}
+
+            - name: Setup node
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '16'
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm run test:cov
+
+            - name: Install coverage badge dep
+              run: npm i coverage-badges-cli -g
+
+            - name: Generate coverage badge
+              run: coverage-badges --source=coverage/coverage-summary.json --output=badges/coverage.svg
+
+            - name: Push badge to remote
+              uses: EndBug/add-and-commit@v8
+              with:
+                  author_name: github-actions[bot]
+                  author_email: 41898282+github-actions[bot]@users.noreply.github.com
+                  message: '[skip ci] adding coverage badge'
+                  add: ./badges/
+                  push: true

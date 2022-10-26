@@ -1,16 +1,16 @@
 import { inject, injectable } from 'inversify';
-import { API } from './api';
-import { Shell } from './shell';
-import { ProjectConfig } from './projectConfig';
-import projectSelectionPrompt from './prompts/projectSelection.prompt';
-import singleProjectActionPrompt from './prompts/singleProjectAction.prompt';
-import { Secrets } from './secrets';
-import { Project } from './types/Project.type';
-import { FileUtil, objectToFileNotation } from './utils/fileUtil';
-import { Logger } from './utils/logger';
+import API from '../api';
+import Shell from '../shell';
+import ProjectConfig from '../projectConfig';
+import projectSelectionPrompt from '../prompts/projectSelection.prompt';
+import singleProjectActionPrompt from '../prompts/singleProjectAction.prompt';
+import Secrets from '../secrets';
+import { Project } from '../types/Project.type';
+import { FileUtil, objectToFileNotation } from '../utils/fileUtil';
+import { Logger } from '../utils/logger';
 
 @injectable()
-export class Projects {
+export default class Projects {
     constructor(
         @inject('API') private _api: API,
         @inject('Logger') private logger: Logger,
@@ -123,7 +123,7 @@ export class Projects {
             this.logger.error(
                 'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
             );
-            return true;
+            return false;
         }
 
         await this.promptSingleProjectActions(configData['PROJECT']);
@@ -172,7 +172,6 @@ export class Projects {
         classifiers?: string[]
     ) {
         const secrets = await this.getCurrentProjectSecrets(classifiers);
-        if (!secrets) return;
-        return this.shell.initialize(coreProcess, processArgs, secrets);
+        return this.shell.initialize(coreProcess, processArgs, secrets || {});
     }
 }

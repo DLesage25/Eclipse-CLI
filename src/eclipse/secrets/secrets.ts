@@ -1,13 +1,13 @@
 import { inject, injectable } from 'inversify';
-import { API } from './api';
-import createSecretPrompt from './prompts/createSecret.prompt';
-import deleteSecretPrompt from './prompts/deleteSecret.prompt';
-import { Project } from './types/Project.type';
-import { Secret } from './types/Secret.type';
-import { Logger } from './utils/logger';
+import API from '../api';
+import createSecretPrompt from '../prompts/createSecret.prompt';
+import deleteSecretPrompt from '../prompts/deleteSecret.prompt';
+import { Project } from '../types/Project.type';
+import { RevealedSecret } from '../types/Secret.type';
+import { Logger } from '../utils/logger';
 
 @injectable()
-export class Secrets {
+export default class Secrets {
     constructor(
         @inject('API') private _api: API,
         @inject('Logger') private logger: Logger
@@ -48,8 +48,7 @@ export class Secrets {
 
     public async getPartialSecrets(
         project: Project,
-        classifiers?: Array<string>,
-        includeAllProperties?: boolean
+        classifiers?: Array<string>
     ): Promise<void | { [key: string]: string }> {
         const secrets = await this._api.getSecrets(project._id, classifiers);
 
@@ -61,9 +60,7 @@ export class Secrets {
             (prev, secret) => {
                 return {
                     ...prev,
-                    [secret.name]: includeAllProperties
-                        ? { ...secret }
-                        : secret.value,
+                    [secret.name]: secret.value,
                 };
             },
             {}
@@ -74,22 +71,20 @@ export class Secrets {
     public async getFullSecrets(
         project: Project,
         classifiers?: Array<string>
-    ): Promise<void | { [key: string]: Secret }> {
+    ): Promise<void | { [key: string]: RevealedSecret }> {
         const secrets = await this._api.getSecrets(project._id, classifiers);
 
         if (!secrets.length) {
             return;
         }
 
-        const secretsWithName: { [key: string]: Secret } = secrets.reduce(
-            (prev, secret) => {
+        const secretsWithName: { [key: string]: RevealedSecret } =
+            secrets.reduce((prev, secret) => {
                 return {
                     ...prev,
                     [secret.name]: { ...secret },
                 };
-            },
-            {}
-        );
+            }, {});
         return secretsWithName;
     }
 

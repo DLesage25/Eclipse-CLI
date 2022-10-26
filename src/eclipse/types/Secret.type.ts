@@ -8,6 +8,7 @@ export interface Secret {
 }
 
 export interface RevealedSecret {
+    _id: string;
     value: string;
     classifiers: Array<string>;
     aliases: Array<{

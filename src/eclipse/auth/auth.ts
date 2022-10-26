@@ -3,55 +3,17 @@ import { inject, injectable } from 'inversify';
 import http, { Server } from 'http';
 import url from 'url';
 import open from 'open';
-import axios from 'axios';
+
 import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
-import { KeyChain } from '../keychain';
+import KeyChain from '../keychain';
 import { AuthConfig } from '../types/AuthConfig.type';
-import { CoreConfigModule } from '../coreConfig';
-
-const requestUserToken = (
-    codeVerifier: string,
-    code: string,
-    serverConfig: ServerConfig
-) => {
-    return axios({
-        method: 'POST',
-        url: `${serverConfig.ECLIPSE_AUTH_DOMAIN}/oauth/token`,
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        data: new URLSearchParams({
-            grant_type: 'authorization_code',
-            client_id: serverConfig.ECLIPSE_AUTH_CLIENT_ID,
-            code_verifier: codeVerifier,
-            code,
-            redirect_uri: serverConfig.ECLIPSE_AUTH_CALLBACK_URL,
-        }),
-    })
-        .then((res) => {
-            const { access_token, expires_in } = res.data;
-            return { access_token, expires_in };
-        })
-        .catch((err) => {
-            throw new Error('Error attempting to request user token - ' + err);
-        });
-};
-
-interface ServerConfig {
-    ECLIPSE_AUTH_DOMAIN: string;
-    ECLIPSE_AUTH_CLIENT_ID: string;
-    ECLIPSE_AUTH_CALLBACK_URL: string;
-    ECLIPSE_AUTH_SERVER_PORT: number;
-}
-
-interface AuthUrlConfig {
-    ECLIPSE_AUTH_TARGET_AUDIENCE: string;
-    ECLIPSE_AUTH_CLIENT_ID: string;
-    ECLIPSE_AUTH_CALLBACK_URL: string;
-    ECLIPSE_AUTH_DOMAIN: string;
-}
+import CoreConfigModule from '../coreConfig';
+import { base64URLEncode, requestUserToken, sha256 } from './authUtils';
+import { AuthUrlConfig, ServerConfig } from './auth.types';
 
 @injectable()
-export class Auth {
+export default class Auth {
     private codeVerifier: string;
     private authConfig: AuthConfig | null;
     constructor(
@@ -136,24 +98,12 @@ export class Auth {
         return false;
     }
 
-    private base64URLEncode(str: Buffer): string {
-        return str
-            .toString('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=/g, '');
-    }
-
-    private sha256(buffer: string) {
-        return crypto.createHash('sha256').update(buffer).digest();
-    }
-
     private createCodeVerifier(): string {
-        return this.base64URLEncode(crypto.randomBytes(32));
+        return base64URLEncode(crypto.randomBytes(32));
     }
 
     private createCodeChallenge(verifier: string): string {
-        return this.base64URLEncode(this.sha256(verifier));
+        return base64URLEncode(sha256(verifier));
     }
 
     private createAuthServer(serverConfig: ServerConfig): Server {

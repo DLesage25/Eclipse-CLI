@@ -1,10 +1,10 @@
 import { inject, injectable } from 'inversify';
-import { KeyChain } from './keychain';
-import { ApiConfig, CoreConfig } from './types/CoreConfig.type';
-import { fileNotationToObject, objectToFileNotation } from './utils/fileUtil';
+import KeyChain from '../keychain';
+import { ApiConfig, CoreConfig } from '../types/CoreConfig.type';
+import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 
 @injectable()
-export class CoreConfigModule {
+export default class CoreConfigModule {
     constructor(@inject('KeyChain') private keychain: KeyChain) {}
 
     public async get(): Promise<CoreConfig | null> {
@@ -32,9 +32,9 @@ export class CoreConfigModule {
     }: ApiConfig): Promise<boolean> {
         await this.set({
             ECLIPSE_AUTH_SERVER_PORT: 4242,
-            ECLIPSE_AUTH_CALLBACK_URL: 'http://localhost:4242',
             ECLIPSE_AUTH_CLIENT_ID,
             ECLIPSE_AUTH_DOMAIN,
+            ECLIPSE_AUTH_CALLBACK_URL: 'http://localhost:4242',
             ECLIPSE_AUTH_TARGET_AUDIENCE,
         });
         return true;
