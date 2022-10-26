@@ -42,7 +42,7 @@ $ A new tab will open in your default browser. Please log in and come back to yo
 
 You can access Eclipse's menu by running `eclipse` in your terminal. There are also simple shortcuts that you can use to interact with the CLI.
 
-#### Config files
+### Config files
 
 Eclipse config files (`.eclipserc`) tell Eclipse which project your repository belongs to. You can have Eclipse create a config file using the CLI menu, by selecting a project and then the `Initialize a config file` option.
 
@@ -50,7 +50,7 @@ Eclipse will create a config file in the current working directory with the iden
 
 Once the config file is created, you will be able to use the CLI to inject environment variables into your code's execution context.
 
-#### Environment injection
+### Environment injection
 
 Eclipse can inject environment variables into any execution context. Use the following syntax:
 
@@ -76,7 +76,7 @@ You can also filter the injected secrets by passing in one or more comma-separat
 foo@bar:~$ eclipse i web,staging npm start
 ```
 
-#### List all project secrets
+### List project secrets
 
 You can list project secrets and their values on your console using the CLI menu. If you are on a directory with a config file, you can also run:
 
@@ -100,11 +100,11 @@ MY_WEB_STAGING_SECRET=some_value
 MY_OTHER_WEB_STAGING_SECRET=some_other_value
 ```
 
-#### Managing secrets
+### Managing secrets
 
 You can add or remove secrets on the [Eclipse webapp](https://eclipsejs.io) or from the CLI menu. If you are on a directory with a config file, you can also use the following shortcuts:
 
-##### Adding a secret
+#### Creating a secret
 
 ```console
 $ eclipse add/a <secretname> <secretvalue> <classifiers>
@@ -117,14 +117,14 @@ foo@bar:~$ eclipse add MY_TEST_SECRET MY_TEST_VALUE web
 $ Secret MY_TEST_SECRET has been created under project MERN project.
 ```
 
-##### Creating a secret with multiple classifiers:
+#### Creating a secret with multiple classifiers:
 
 ```console
 foo@bar:~$ eclipse a MY_TEST_SECRET MY_TEST_VALUE web,staging
 $ Secret MY_TEST_SECRET has been created under project MERN project.
 ```
 
-##### Removing a secret:
+#### Removing a secret:
 
 ```console
 $ eclipse remove/rm <secretname> <optional - classifiers>
@@ -142,6 +142,6 @@ foo@bar:~$ eclipse rm MY_TEST_SECRET staging
 $ Secret MY_TEST_SECRET deleted.
 ```
 
-#### Printing to env file
+### Printing to env file
 
 You can optionally print project secrets to a `.env` file if you do not wish to use Eclipse's environment injection feature. You can do this through the CLI menu.
