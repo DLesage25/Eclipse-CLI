@@ -38,7 +38,7 @@ foo@bar:~$ eclipse login
 $ A new tab will open in your default browser. Please log in and come back to your terminal after.
 ```
 
-### Usage
+## Usage
 
 You can access Eclipse's menu by running `eclipse` in your terminal. There are also simple shortcuts that you can use to interact with the CLI.
 
