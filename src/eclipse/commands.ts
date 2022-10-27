@@ -5,14 +5,13 @@ import Projects from './projects';
 import Auth from './auth';
 import Secrets from './secrets';
 import { Logger } from './utils/logger';
-import { Options } from './options';
 import { Project } from './types/Project.type';
 import { PROJECT_COMMANDS } from './constants/projectCommands';
+import { helpMessage } from './constants/messages';
 
 @injectable()
 export class Commands {
     constructor(
-        @inject('Options') private options: Options,
         @inject('Logger') private logger: Logger,
         @inject('Projects') private projects: Projects,
         @inject('Auth') private auth: Auth,
@@ -204,6 +203,6 @@ export class Commands {
     }
 
     private showHelpLog(): void {
-        this.options.showOptions();
+        this.logger.message(helpMessage);
     }
 }
