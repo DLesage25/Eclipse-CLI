@@ -4,6 +4,7 @@ export interface CoreConfig {
     ECLIPSE_AUTH_DOMAIN: string;
     ECLIPSE_AUTH_CALLBACK_URL: string;
     ECLIPSE_AUTH_TARGET_AUDIENCE: string;
+    FIRST_RUN: boolean;
 }
 
 export interface ApiConfig {

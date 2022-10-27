@@ -36,7 +36,7 @@ export default class Auth {
 
         if (tokenExpired) return this.initializeAuthFlow();
 
-        this.logger.success('Session restored. Welcome back!');
+        this.logger.success('\n Session restored. Welcome back!');
 
         return false;
     }
