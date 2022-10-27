@@ -148,7 +148,7 @@ describe('fileUtil', () => {
 
             const result = await fileUtil.readIntoObject();
             expect(fs.readFile).toHaveBeenCalled();
-            expect(result).toEqual({ test: 'true' });
+            expect(result).toEqual({ test: true });
         });
 
         it('should return empty object if error', async () => {

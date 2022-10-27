@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { promises as fs } from 'fs';
 
 interface KeyValues {
-    [key: string]: string | number;
+    [key: string]: string | number | boolean | Record<string, any>;
 }
 
 @injectable()
@@ -86,9 +86,14 @@ export const fileNotationToObject = <T>(fileData: string): T => {
 
     return keyValArray.reduce((prev, current) => {
         const keyVal = current.split('=');
-        const value = isNaN(+keyVal[1]) ? keyVal[1] : +keyVal[1];
+        const value = keyVal[1];
+        const formattedValue = !isNaN(+value)
+            ? +value
+            : value === 'true' || value === 'false' || hasJsonStructure(value)
+            ? JSON.parse(value)
+            : value;
 
-        return { ...prev, [keyVal[0]]: value };
+        return { ...prev, [keyVal[0]]: formattedValue };
     }, {}) as T;
 };
 
@@ -100,4 +105,15 @@ export const objectToFileNotation = (keyValues: object) => {
         formattedString += `${key}=${kv[key]}\n`;
     }
     return formattedString;
+};
+
+const hasJsonStructure = (str: string): boolean => {
+    if (typeof str !== 'string') return false;
+    try {
+        const result = JSON.parse(str);
+        const type = Object.prototype.toString.call(result);
+        return type === '[object Object]' || type === '[object Array]';
+    } catch (err) {
+        return false;
+    }
 };
