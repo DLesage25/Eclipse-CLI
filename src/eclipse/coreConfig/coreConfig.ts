@@ -36,6 +36,7 @@ export default class CoreConfigModule {
             ECLIPSE_AUTH_DOMAIN,
             ECLIPSE_AUTH_CALLBACK_URL: 'http://localhost:4242',
             ECLIPSE_AUTH_TARGET_AUDIENCE,
+            FIRST_RUN: true,
         });
         return true;
     }

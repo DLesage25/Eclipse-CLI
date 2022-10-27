@@ -10,6 +10,7 @@ import Projects from '../projects';
 import { Logger } from '../utils/logger';
 import { Commands } from '../commands';
 import mainMenuPrompt from '../prompts/mainMenu.prompt';
+import { helpMessage, welcomeMessage } from '../constants/messages';
 
 @injectable()
 export default class Main {
@@ -84,6 +85,12 @@ export default class Main {
 
     private async checkForCoreConfig(): Promise<boolean> {
         const config = await this.coreConfig.get();
+
+        if (config && config.FIRST_RUN) {
+            this.logger.message(`${welcomeMessage} ${helpMessage}`);
+            await this.coreConfig.set({ ...config, FIRST_RUN: false });
+            return true;
+        }
 
         if (config) return true;
 
