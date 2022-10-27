@@ -10,7 +10,7 @@ import Projects from '../projects';
 import { Logger } from '../utils/logger';
 import { Commands } from '../commands';
 import mainMenuPrompt from '../prompts/mainMenu.prompt';
-import { helpMessage, welcomeMessage } from 'eclipse/constants/messages';
+import { helpMessage, welcomeMessage } from '../constants/messages';
 
 @injectable()
 export default class Main {
