@@ -16,9 +16,9 @@ You can install Eclipse using NPM or Yarn
 
 ```
 // Use npm
-npm i -g @eclipse/cli
+npm i -g @eclipsejs/cli
 // Or yarn
-yarn add global @eclipse/cli
+yarn add global @eclipsejs/cli
 ```
 
 ### Initialize and log in
