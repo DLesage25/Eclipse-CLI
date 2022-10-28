@@ -30,7 +30,7 @@ ${yellow(
 )} will inject only secrets with the web and staging classifiers.
 
 - ${green(
-    'eclipse ls/list <optional -classifiers>'
+    'eclipse ls/list <optional - classifiers>'
 )} - list the secrets of the project tagged in your working directory. Optionally, pass classifiers to only see a subset of your secrets.
 
 For example:
