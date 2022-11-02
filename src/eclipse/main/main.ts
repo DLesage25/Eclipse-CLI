@@ -10,7 +10,7 @@ import Projects from '../projects';
 import { Logger } from '../utils/logger';
 import { Commands } from '../commands';
 import mainMenuPrompt from '../prompts/mainMenu.prompt';
-import { helpMessage, welcomeMessage } from '../constants/messages';
+import { welcomeMessage } from '../constants/messages';
 
 @injectable()
 export default class Main {
@@ -57,9 +57,11 @@ export default class Main {
 
         if (!isConfigured) return true;
 
-        const requiresRestart = await this.auth.checkIfAuthFlowRequired();
+        const loggedIn = await this.auth.checkIfAuthFlowRequired();
 
-        if (requiresRestart) return true;
+        if (!loggedIn) return false;
+
+        await this.checkIfFirstRun();
 
         await this._api.Initialize();
 
@@ -83,22 +85,24 @@ export default class Main {
         return true;
     }
 
-    private async checkForCoreConfig(): Promise<boolean> {
+    private async checkIfFirstRun(): Promise<void> {
         const config = await this.coreConfig.get();
 
-        if (config && config.FIRST_RUN) {
-            this.logger.message(`${welcomeMessage} ${helpMessage}`);
-            await this.coreConfig.set({ ...config, FIRST_RUN: false });
-            return true;
-        }
+        if (!config || !config.FIRST_RUN) return;
+
+        this.logger.message(welcomeMessage);
+        await this.coreConfig.set({ ...config, FIRST_RUN: false });
+        return;
+    }
+
+    private async checkForCoreConfig(): Promise<boolean> {
+        const config = await this.coreConfig.get();
 
         if (config) return true;
 
         this.logger.warning('The CLI is syncing with Eclipse servers.. 🛰');
 
         const cliKeys = await this._api.getCliValues();
-
-        if (!cliKeys) return false;
 
         if (!cliKeys) {
             this.logger.error(
