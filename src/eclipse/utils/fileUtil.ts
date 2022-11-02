@@ -12,7 +12,6 @@ export class FileUtil {
         this.FILE_PATH = filePath;
     }
 
-    //TODO - this still shows an ugly console error even if wrapped in a t/c clause
     public async find() {
         try {
             const stats = await fs.stat(this.FILE_PATH);
@@ -34,18 +33,24 @@ export class FileUtil {
         }
     }
 
-    public async createOrUpdate(data: KeyValues) {
+    public async createOrUpdate(
+        data: KeyValues,
+        fileComment?: string
+    ): Promise<boolean> {
         const exists = await this.find();
 
         if (exists) {
             return this.replaceOnFile(data);
         }
 
-        const fileData = objectToFileNotation(data);
+        const fileNotation = objectToFileNotation(data);
+        const fileData = fileComment
+            ? `${fileComment}\n${fileNotation}`
+            : fileNotation;
         return this.writeFile(fileData);
     }
 
-    public async read() {
+    public async read(): Promise<string> {
         try {
             return fs.readFile(this.FILE_PATH).then((res) => res.toString());
         } catch (e) {
@@ -54,17 +59,22 @@ export class FileUtil {
         }
     }
 
-    public async readIntoObject<T>() {
+    public async readIntoObject<T>(
+        containsComment?: boolean
+    ): Promise<T | Record<string, unknown>> {
         try {
-            const raw = await this.read();
-            return fileNotationToObject<T>(raw);
+            const rawData = await this.read();
+            const commentRemoved = containsComment
+                ? rawData.split('\n').slice(1).join('\n')
+                : rawData;
+            return fileNotationToObject<T>(commentRemoved);
         } catch (e) {
             console.error(`Error reading file into object ${e}`);
             return {};
         }
     }
 
-    public async replaceOnFile(update: KeyValues) {
+    public async replaceOnFile(update: KeyValues): Promise<boolean> {
         try {
             const rawData = await this.read();
             const fileData = fileNotationToObject<KeyValues>(rawData);
