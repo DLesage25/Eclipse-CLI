@@ -1,14 +1,14 @@
 import * as crypto from 'crypto';
-import { inject, injectable } from 'inversify';
-import http, { Server } from 'http';
+import http from 'http';
 import url from 'url';
 import open from 'open';
+import { inject, injectable } from 'inversify';
 
+import KeyChain from '../keychain';
+import CoreConfigModule from '../coreConfig';
 import { fileNotationToObject, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
-import KeyChain from '../keychain';
 import { AuthConfig } from '../types/AuthConfig.type';
-import CoreConfigModule from '../coreConfig';
 import { base64URLEncode, requestUserToken, sha256 } from './authUtils';
 import { AuthUrlConfig, ServerConfig } from './auth.types';
 
@@ -38,7 +38,7 @@ export default class Auth {
 
         this.logger.success('\n Session restored. Welcome back!');
 
-        return false;
+        return true;
     }
 
     public async initializeAuthFlow(): Promise<boolean> {
@@ -58,24 +58,28 @@ export default class Auth {
             ECLIPSE_AUTH_TARGET_AUDIENCE,
         } = coreConfig;
 
-        this.createAuthServer({
-            ECLIPSE_AUTH_DOMAIN,
-            ECLIPSE_AUTH_CLIENT_ID,
-            ECLIPSE_AUTH_CALLBACK_URL,
-            ECLIPSE_AUTH_SERVER_PORT,
-        });
-
         const authUrl = this.constructAuthUrl(codeChallenge, 'abc123', {
             ECLIPSE_AUTH_DOMAIN,
             ECLIPSE_AUTH_CLIENT_ID,
             ECLIPSE_AUTH_TARGET_AUDIENCE,
             ECLIPSE_AUTH_CALLBACK_URL,
         });
-        await this.openAuthPage(authUrl);
+        this.openAuthPage(authUrl);
 
-        this.logger.success(
-            'A new tab will open in your default browser. Once you have logged in, hit control+C and run eclipse again.'
+        this.logger.message(
+            '\nA new tab will open in your default browser. Please log in and come back to your terminal.'
         );
+
+        await this.createAuthServer({
+            ECLIPSE_AUTH_DOMAIN,
+            ECLIPSE_AUTH_CLIENT_ID,
+            ECLIPSE_AUTH_CALLBACK_URL,
+            ECLIPSE_AUTH_SERVER_PORT,
+        });
+
+        console.clear();
+
+        this.logger.success("\nYou've been logged in successfully!");
 
         return true;
     }
@@ -106,23 +110,24 @@ export default class Auth {
         return base64URLEncode(sha256(verifier));
     }
 
-    private createAuthServer(serverConfig: ServerConfig): Server {
-        return http
-            .createServer(
+    private createAuthServer(serverConfig: ServerConfig): Promise<void> {
+        return new Promise((resolve) => {
+            http.createServer(
                 this.handleAuthResponse(
                     this.codeVerifier,
                     this.keyChain,
                     this.logger,
-                    serverConfig
+                    serverConfig,
+                    () => resolve()
                 )
-            )
-            .listen(serverConfig.ECLIPSE_AUTH_SERVER_PORT, (err?: Error) => {
+            ).listen(serverConfig.ECLIPSE_AUTH_SERVER_PORT, (err?: Error) => {
                 if (err) {
                     this.logger.error(
                         `Unable to start an HTTP server on port ${serverConfig.ECLIPSE_AUTH_SERVER_PORT}: ${err}`
                     );
                 }
             });
+        });
     }
 
     private constructAuthUrl(
@@ -134,10 +139,10 @@ export default class Auth {
             `${authUrlConfig.ECLIPSE_AUTH_DOMAIN}/authorize`,
             `?response_type=code`,
             `&code_challenge_method=S256`,
+            `&scope=email`,
             `&code_challenge=${codeChallenge}`,
             `&client_id=${authUrlConfig.ECLIPSE_AUTH_CLIENT_ID}`,
             `&redirect_uri=${authUrlConfig.ECLIPSE_AUTH_CALLBACK_URL}`,
-            `&scope=email`,
             `&audience=${authUrlConfig.ECLIPSE_AUTH_TARGET_AUDIENCE}`,
             `&state=${state}`,
         ].join('');
@@ -160,7 +165,8 @@ export default class Auth {
             codeVerifier: string,
             keychain: KeyChain,
             logger: Logger,
-            serverConfig: ServerConfig
+            serverConfig: ServerConfig,
+            callback: () => void
         ) =>
         async (req: http.IncomingMessage, res: http.ServerResponse) => {
             if (!req.url) return;
@@ -208,9 +214,9 @@ export default class Auth {
                     expiration_date,
                 });
 
-                keychain.setKey('eclipse', 'auth', fileFormat);
-
-                return res.end();
+                await keychain.setKey('eclipse', 'auth', fileFormat);
+                res.end();
+                callback();
             } catch (err) {
                 logger.error(`Error attempting to save access token: ${err}`);
                 return;
@@ -220,5 +226,6 @@ export default class Auth {
     public async logout() {
         await this.keyChain.deleteKey('eclipse', 'auth');
         this.logger.message("You've been logged out successfully.");
+        return;
     }
 }
