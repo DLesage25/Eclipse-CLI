@@ -104,8 +104,6 @@ export default class Main {
 
         const cliKeys = await this._api.getCliValues();
 
-        if (!cliKeys) return false;
-
         if (!cliKeys) {
             this.logger.error(
                 'We were not able to contact the Eclipse servers. Please retry, or if the problem persists contact support @ support@eclipsejs.io'
