@@ -122,14 +122,28 @@ describe('API', () => {
         it('should hit users endpoint and return values', async () => {
             mockGet.mockResolvedValueOnce({
                 data: {
-                    test: true,
+                    payload: {
+                        _id: 'id',
+                        name: 'name',
+                        email: 'email',
+                        sub: 'sub',
+                        createdAt: 'date',
+                        projects: [],
+                    },
+                    timestamp: 1,
+                    statusCode: 200,
                 },
             });
             const result = await api.getUser();
 
             expect(mockGet).toHaveBeenCalledWith('/users');
             expect(result).toEqual({
-                test: true,
+                _id: 'id',
+                name: 'name',
+                email: 'email',
+                sub: 'sub',
+                createdAt: 'date',
+                projects: [],
             });
         });
     });
@@ -142,11 +156,15 @@ describe('API', () => {
 
         it('should hit projects endpoint with no request options if not projectId is sent', async () => {
             mockGet.mockResolvedValueOnce({
-                data: [
-                    {
-                        _id: '1',
-                    },
-                ],
+                data: {
+                    timestamp: 1,
+                    statusCode: 200,
+                    payload: [
+                        {
+                            _id: '1',
+                        },
+                    ],
+                },
             });
             const result = await api.getProjects();
 
@@ -156,7 +174,11 @@ describe('API', () => {
 
         it('should hit projects endpoint and return parsed data if of type string', async () => {
             mockGet.mockResolvedValueOnce({
-                data: '[{"_id": "1"}]',
+                data: {
+                    payload: '[{"_id": "1"}]',
+                    statusCode: 200,
+                    timestamp: 1,
+                },
             });
             const result = await api.getProjects();
 
@@ -166,11 +188,15 @@ describe('API', () => {
 
         it('should hit projects endpoint with no projectId parameter if sent to method', async () => {
             mockGet.mockResolvedValueOnce({
-                data: [
-                    {
-                        _id: '1',
-                    },
-                ],
+                data: {
+                    timestamp: 1,
+                    statusCode: 200,
+                    payload: [
+                        {
+                            _id: '1',
+                        },
+                    ],
+                },
             });
             const result = await api.getProjects('projectId');
 
@@ -206,11 +232,15 @@ describe('API', () => {
 
         it('should hit secrets endpoint with given project id and classifiers and return data', async () => {
             mockGet.mockResolvedValueOnce({
-                data: [
-                    {
-                        _id: 'secret',
-                    },
-                ],
+                data: {
+                    timestamp: 1,
+                    statusCode: 200,
+                    payload: [
+                        {
+                            _id: 'secret',
+                        },
+                    ],
+                },
             });
             const result = await api.getSecrets('projectId', [
                 'classifier1',
@@ -262,18 +292,20 @@ describe('API', () => {
             classifiers: ['classifier1', 'classifier2'],
         };
 
-        it('should post to secrets endpoint with dto', async () => {
+        it('should post to create secrets endpoint with dto', async () => {
             mockPost.mockResolvedValueOnce({
-                data: [
-                    {
+                data: {
+                    timestamps: 1,
+                    statusCode: 200,
+                    payload: {
                         _id: 'secret',
                     },
-                ],
+                },
             });
             const result = await api.createSecret(createSecretDto);
 
             expect(mockPost).toHaveBeenCalledWith('/secrets', createSecretDto);
-            expect(result).toEqual([{ _id: 'secret' }] as Secret[]);
+            expect(result).toEqual({ _id: 'secret' } as Secret);
         });
         it('should error log and return null if get request fails', async () => {
             mockPost.mockRejectedValueOnce('error');
