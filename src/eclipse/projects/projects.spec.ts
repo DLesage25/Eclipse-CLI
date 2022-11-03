@@ -1,4 +1,5 @@
 import { Project } from 'eclipse/types/Project.type';
+import { RevealedSecret, Secret } from 'eclipse/types/Secret.type';
 import 'reflect-metadata';
 
 import { ApiMock } from '../../mocks/api.mock';
@@ -154,25 +155,34 @@ describe('projects', () => {
         });
 
         it('should return early if no secrets are found and log a warning', async () => {
-            jest.spyOn(secretsMock, 'getPartialSecrets');
+            jest.spyOn(secretsMock, 'getFullSecrets');
             jest.spyOn(loggerMock, 'warning');
 
             await projects.viewProjectSecrets({ _id: '123' } as Project);
 
-            expect(secretsMock.getPartialSecrets).toHaveBeenCalled();
+            expect(secretsMock.getFullSecrets).toHaveBeenCalled();
             expect(loggerMock.warning).toHaveBeenCalled();
         });
 
         it('should log all formatted secrets if found', async () => {
-            jest.spyOn(secretsMock, 'getPartialSecrets').mockResolvedValueOnce({
-                test: 'true',
+            jest.spyOn(secretsMock, 'getFullSecrets').mockResolvedValueOnce({
+                test: {
+                    _id: 'test',
+                    value: 'testvalue',
+                    classifiers: ['1', '2'],
+                    created_at: 'date',
+                    name: 'name',
+                    storage: 'storage',
+                    format: 'format',
+                    aliases: [],
+                } as RevealedSecret,
             });
             jest.spyOn(loggerMock, 'success');
 
             await projects.viewProjectSecrets({ _id: '123' } as Project);
 
-            expect(secretsMock.getPartialSecrets).toHaveBeenCalled();
-            expect(loggerMock.success).toHaveBeenCalledWith('test=true\n');
+            expect(secretsMock.getFullSecrets).toHaveBeenCalled();
+            expect(loggerMock.success).toHaveBeenCalled();
         });
     });
 
@@ -362,7 +372,7 @@ describe('projects', () => {
                 _id: '123',
             } as Project);
             jest.spyOn(secretsMock, 'getPartialSecrets').mockResolvedValueOnce({
-                test: 'true',
+                name: 'true',
             });
 
             const result = await projects.getCurrentProjectSecrets();
@@ -370,7 +380,7 @@ describe('projects', () => {
             expect(projects.getCurrentProject).toHaveBeenCalled();
             expect(secretsMock.getPartialSecrets).toHaveBeenCalled();
             expect(result).toEqual({
-                test: 'true',
+                name: 'true',
             });
         });
     });
