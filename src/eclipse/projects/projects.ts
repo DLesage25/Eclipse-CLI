@@ -8,7 +8,7 @@ import Secrets from '../secrets';
 import { Project } from '../types/Project.type';
 import { FileUtil, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
-import { helpMessage } from 'eclipse/constants/messages';
+import { helpMessage } from '../constants/messages';
 
 @injectable()
 export default class Projects {
@@ -125,7 +125,7 @@ export default class Projects {
 
         const configData = await this.projectConfig.readConfigFile();
 
-        if (!configData) {
+        if (!configData || !configData.PROJECT) {
             this.logger.error(
                 'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
             );
@@ -144,9 +144,9 @@ export default class Projects {
     public async getCurrentProject(): Promise<Project | undefined> {
         const configData = await this.projectConfig.readConfigFile();
 
-        if (!configData) {
+        if (!configData || !configData.PROJECT) {
             this.logger.error(
-                'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
+                'Malformed or inexistent config file. Try creating a configuration file in this directory using the main menu.'
             );
             return;
         }
