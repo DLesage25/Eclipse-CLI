@@ -10,7 +10,7 @@ import Projects from '../projects';
 import { Logger } from '../utils/logger';
 import { Commands } from '../commands';
 import mainMenuPrompt from '../prompts/mainMenu.prompt';
-import { welcomeMessage } from '../constants/messages';
+import { helpMessage, welcomeMessage } from '../constants/messages';
 
 @injectable()
 export default class Main {
@@ -123,6 +123,7 @@ export default class Main {
 
         if (action === 'view') await this.projects.projectSelection();
         if (action === 'logout') await this.auth.logout();
+        if (action === 'help') this.logger.message(helpMessage);
         return true;
     }
 

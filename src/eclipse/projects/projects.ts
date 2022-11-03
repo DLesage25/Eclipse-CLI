@@ -8,6 +8,7 @@ import Secrets from '../secrets';
 import { Project } from '../types/Project.type';
 import { FileUtil, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
+import { helpMessage } from '../constants/messages';
 
 @injectable()
 export default class Projects {
@@ -32,6 +33,11 @@ export default class Projects {
                 return this.printSecrets(project);
             case 'createConfig':
                 return this.projectConfig.createConfigFile(project._id);
+            case 'help':
+                this.logger.message(helpMessage);
+                return;
+            case 'exit':
+                return;
             default:
                 this.logger.warning('Command not recognized');
                 return;
@@ -119,14 +125,14 @@ export default class Projects {
 
         const configData = await this.projectConfig.readConfigFile();
 
-        if (!configData['PROJECT']) {
+        if (!configData || !configData.PROJECT) {
             this.logger.error(
                 'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
             );
             return false;
         }
 
-        await this.promptSingleProjectActions(configData['PROJECT']);
+        await this.promptSingleProjectActions(configData.PROJECT);
 
         return true;
     }
@@ -138,14 +144,14 @@ export default class Projects {
     public async getCurrentProject(): Promise<Project | undefined> {
         const configData = await this.projectConfig.readConfigFile();
 
-        if (!configData['PROJECT']) {
+        if (!configData || !configData.PROJECT) {
             this.logger.error(
-                'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
+                'Malformed or inexistent config file. Try creating a configuration file in this directory using the main menu.'
             );
             return;
         }
 
-        return this.getProject(configData['PROJECT']);
+        return this.getProject(configData.PROJECT);
     }
 
     public async getCurrentProjectSecrets(classifiers?: string[]) {
