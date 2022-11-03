@@ -61,7 +61,7 @@ export class FileUtil {
 
     public async readIntoObject<T>(
         containsComment?: boolean
-    ): Promise<T | Record<string, unknown>> {
+    ): Promise<T | null> {
         try {
             const rawData = await this.read();
             const commentRemoved = containsComment
@@ -70,7 +70,7 @@ export class FileUtil {
             return fileNotationToObject<T>(commentRemoved);
         } catch (e) {
             console.error(`Error reading file into object ${e}`);
-            return {};
+            return null;
         }
     }
 

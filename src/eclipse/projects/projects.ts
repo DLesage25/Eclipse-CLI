@@ -119,14 +119,14 @@ export default class Projects {
 
         const configData = await this.projectConfig.readConfigFile();
 
-        if (!configData['PROJECT']) {
+        if (!configData) {
             this.logger.error(
                 'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
             );
             return false;
         }
 
-        await this.promptSingleProjectActions(configData['PROJECT']);
+        await this.promptSingleProjectActions(configData.PROJECT);
 
         return true;
     }
@@ -138,14 +138,14 @@ export default class Projects {
     public async getCurrentProject(): Promise<Project | undefined> {
         const configData = await this.projectConfig.readConfigFile();
 
-        if (!configData['PROJECT']) {
+        if (!configData) {
             this.logger.error(
                 'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
             );
             return;
         }
 
-        return this.getProject(configData['PROJECT']);
+        return this.getProject(configData.PROJECT);
     }
 
     public async getCurrentProjectSecrets(classifiers?: string[]) {
