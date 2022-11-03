@@ -1,4 +1,5 @@
 import { inject, injectable } from 'inversify';
+import Table from 'cli-table';
 import API from '../api';
 import Shell from '../shell';
 import ProjectConfig from '../projectConfig';
@@ -6,7 +7,7 @@ import projectSelectionPrompt from '../prompts/projectSelection.prompt';
 import singleProjectActionPrompt from '../prompts/singleProjectAction.prompt';
 import Secrets from '../secrets';
 import { Project } from '../types/Project.type';
-import { FileUtil, objectToFileNotation } from '../utils/fileUtil';
+import { FileUtil } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
 import { helpMessage } from '../constants/messages';
 
@@ -88,18 +89,29 @@ export default class Projects {
         project: Project,
         classifiers?: Array<string>
     ) {
-        const secrets = await this.secrets.getPartialSecrets(
-            project,
-            classifiers
-        );
+        const secrets = await this.secrets.getFullSecrets(project, classifiers);
 
         if (!secrets) {
             this.logger.warning(`No secrets found for project ${project.name}`);
             return;
         }
 
-        const formattedSecrets = objectToFileNotation(secrets);
-        this.logger.success(formattedSecrets);
+        const formattedSecrets = Object.entries(secrets).map(
+            ([secretName, secret]) => [
+                secretName,
+                secret.value,
+                secret.classifiers.join(','),
+                secret.created_at,
+            ]
+        );
+
+        const secretTable = new Table({
+            head: ['Name', 'Value', 'Classifiers', 'Created'],
+            colWidths: [30, 30, 20, 25],
+            rows: formattedSecrets,
+        });
+
+        this.logger.success(secretTable.toString());
         return;
     }
 
