@@ -27,6 +27,11 @@ const projectActions = [
         value: 'print',
         short: 'Print secrets to env file',
     },
+    {
+        name: '🙋 Show help log.',
+        value: 'help',
+        short: 'Show help log',
+    },
 ];
 
 export default function projectSelectionPrompt(projects: Project[]) {

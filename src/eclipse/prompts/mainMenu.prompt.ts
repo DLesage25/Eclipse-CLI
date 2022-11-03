@@ -7,6 +7,11 @@ const menuActions = [
         short: 'View projects',
     },
     {
+        name: '🙋 Show help log.',
+        value: 'help',
+        short: 'Show help log',
+    },
+    {
         name: '🚪 Log out',
         value: 'logout',
         short: 'Log out',

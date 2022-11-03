@@ -8,6 +8,7 @@ import Secrets from '../secrets';
 import { Project } from '../types/Project.type';
 import { FileUtil, objectToFileNotation } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
+import { helpMessage } from 'eclipse/constants/messages';
 
 @injectable()
 export default class Projects {
@@ -32,6 +33,9 @@ export default class Projects {
                 return this.printSecrets(project);
             case 'createConfig':
                 return this.projectConfig.createConfigFile(project._id);
+            case 'help':
+                this.logger.message(helpMessage);
+                return;
             default:
                 this.logger.warning('Command not recognized');
                 return;
