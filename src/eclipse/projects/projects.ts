@@ -36,6 +36,8 @@ export default class Projects {
             case 'help':
                 this.logger.message(helpMessage);
                 return;
+            case 'exit':
+                return;
             default:
                 this.logger.warning('Command not recognized');
                 return;

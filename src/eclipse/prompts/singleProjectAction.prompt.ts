@@ -26,6 +26,11 @@ const projectActions = [
         value: 'help',
         short: 'Show help log',
     },
+    {
+        name: '🚪 Exit',
+        value: 'exit',
+        short: 'Exit',
+    },
 ];
 
 export default function singleProjectActionPrompt(projectName: string) {

@@ -12,9 +12,14 @@ const menuActions = [
         short: 'Show help log',
     },
     {
-        name: '🚪 Log out',
+        name: '💤 Log out',
         value: 'logout',
         short: 'Log out',
+    },
+    {
+        name: '🚪 Exit',
+        value: 'exit',
+        short: 'Exit',
     },
 ];
 
