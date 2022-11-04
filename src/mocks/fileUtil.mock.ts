@@ -16,7 +16,10 @@ export class FileUtilMock {
         return true;
     }
 
-    public async createOrUpdate(data: KeyValues): Promise<boolean> {
+    public async createOrUpdate(
+        data: KeyValues,
+        fileComment?: string
+    ): Promise<boolean> {
         return true;
     }
 

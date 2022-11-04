@@ -21,6 +21,16 @@ const projectActions = [
         value: 'print',
         short: 'Print secrets to env file',
     },
+    {
+        name: '🙋 Show help log.',
+        value: 'help',
+        short: 'Show help log',
+    },
+    {
+        name: '🚪 Exit',
+        value: 'exit',
+        short: 'Exit',
+    },
 ];
 
 export default function singleProjectActionPrompt(projectName: string) {

@@ -1,5 +1,5 @@
 import { Project } from 'eclipse/types/Project.type';
-import { Secret } from 'eclipse/types/Secret.type';
+import { RevealedSecret, Secret } from 'eclipse/types/Secret.type';
 
 export class SecretsMock {
     public async addSecretFromMenu(project: Project): Promise<void> {
@@ -30,7 +30,7 @@ export class SecretsMock {
     public async getFullSecrets(
         project: Project,
         classifiers?: string[] | undefined
-    ): Promise<void | { [key: string]: Secret }> {
+    ): Promise<void | { [key: string]: RevealedSecret }> {
         return;
     }
 

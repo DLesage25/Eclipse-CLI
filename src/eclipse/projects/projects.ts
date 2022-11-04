@@ -1,4 +1,5 @@
 import { inject, injectable } from 'inversify';
+import Table from 'cli-table';
 import API from '../api';
 import Shell from '../shell';
 import ProjectConfig from '../projectConfig';
@@ -6,8 +7,9 @@ import projectSelectionPrompt from '../prompts/projectSelection.prompt';
 import singleProjectActionPrompt from '../prompts/singleProjectAction.prompt';
 import Secrets from '../secrets';
 import { Project } from '../types/Project.type';
-import { FileUtil, objectToFileNotation } from '../utils/fileUtil';
+import { FileUtil } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
+import { helpMessage } from '../constants/messages';
 
 @injectable()
 export default class Projects {
@@ -32,6 +34,11 @@ export default class Projects {
                 return this.printSecrets(project);
             case 'createConfig':
                 return this.projectConfig.createConfigFile(project._id);
+            case 'help':
+                this.logger.message(helpMessage);
+                return;
+            case 'exit':
+                return;
             default:
                 this.logger.warning('Command not recognized');
                 return;
@@ -82,18 +89,29 @@ export default class Projects {
         project: Project,
         classifiers?: Array<string>
     ) {
-        const secrets = await this.secrets.getPartialSecrets(
-            project,
-            classifiers
-        );
+        const secrets = await this.secrets.getFullSecrets(project, classifiers);
 
         if (!secrets) {
             this.logger.warning(`No secrets found for project ${project.name}`);
             return;
         }
 
-        const formattedSecrets = objectToFileNotation(secrets);
-        this.logger.success(formattedSecrets);
+        const formattedSecrets = Object.entries(secrets).map(
+            ([secretName, secret]) => [
+                secretName,
+                secret.value,
+                secret.classifiers.join(','),
+                secret.created_at,
+            ]
+        );
+
+        const secretTable = new Table({
+            head: ['Name', 'Value', 'Classifiers', 'Created'],
+            colWidths: [30, 30, 20, 25],
+            rows: formattedSecrets,
+        });
+
+        this.logger.success(secretTable.toString());
         return;
     }
 
@@ -119,14 +137,14 @@ export default class Projects {
 
         const configData = await this.projectConfig.readConfigFile();
 
-        if (!configData['PROJECT']) {
+        if (!configData || !configData.PROJECT) {
             this.logger.error(
                 'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
             );
             return false;
         }
 
-        await this.promptSingleProjectActions(configData['PROJECT']);
+        await this.promptSingleProjectActions(configData.PROJECT);
 
         return true;
     }
@@ -138,14 +156,14 @@ export default class Projects {
     public async getCurrentProject(): Promise<Project | undefined> {
         const configData = await this.projectConfig.readConfigFile();
 
-        if (!configData['PROJECT']) {
+        if (!configData || !configData.PROJECT) {
             this.logger.error(
-                'Malformed config file. Try re-creating the .eclipserc file in your project directory.'
+                'Malformed or inexistent config file. Try creating a configuration file in this directory using the main menu.'
             );
             return;
         }
 
-        return this.getProject(configData['PROJECT']);
+        return this.getProject(configData.PROJECT);
     }
 
     public async getCurrentProjectSecrets(classifiers?: string[]) {

@@ -62,7 +62,7 @@ describe('Auth', () => {
             expect(auth.initializeAuthFlow).toHaveBeenCalled();
         });
 
-        it('should return false if auth config exists and token did not expire', async () => {
+        it('should return true if auth config exists and token did not expire', async () => {
             jest.spyOn(kcMock, 'getKey').mockResolvedValueOnce('test=test');
             const checkIfTokenExpiredSpy = jest
                 .spyOn(Auth.prototype as any, 'checkIfTokenExpired')
@@ -74,7 +74,7 @@ describe('Auth', () => {
             expect(kcMock.getKey).toHaveBeenCalledWith('eclipse', 'auth');
             expect(checkIfTokenExpiredSpy).toHaveBeenCalled();
             expect(auth.initializeAuthFlow).not.toHaveBeenCalled();
-            expect(result).toBeFalsy();
+            expect(result).toBeTruthy();
         });
     });
 
@@ -102,6 +102,7 @@ describe('Auth', () => {
                 ECLIPSE_AUTH_CALLBACK_URL: 'test',
                 ECLIPSE_AUTH_SERVER_PORT: 123,
                 ECLIPSE_AUTH_TARGET_AUDIENCE: 'test',
+                FIRST_RUN: true,
             });
             const createCodeChallengeSpy = jest
                 .spyOn(Auth.prototype as any, 'createCodeChallenge')
@@ -214,7 +215,10 @@ describe('Auth', () => {
                 codeVerifier,
                 kc,
                 loggerMock,
-                serverConfig
+                serverConfig,
+                () => {
+                    return;
+                }
             )(req, res);
             jest.spyOn(url, 'parse');
 
@@ -246,7 +250,10 @@ describe('Auth', () => {
                 codeVerifier,
                 kc,
                 loggerMock,
-                serverConfig
+                serverConfig,
+                () => {
+                    return;
+                }
             )(req, res);
 
             expect(url.parse).toHaveBeenCalled();
@@ -293,7 +300,10 @@ describe('Auth', () => {
                 codeVerifier,
                 kc,
                 loggerMock,
-                serverConfig
+                serverConfig,
+                () => {
+                    return;
+                }
             )(req, res);
             const expiration_date = (1111 + 1 * 1000).toString();
 

@@ -4,8 +4,18 @@ export const welcomeMessage = `
 It looks like this is your first time running Eclipse. 
     
 Use the main menu to access your projects, manage secrets, and create configuration files
-in repos. If you want to start injecting environment variables, run eclipse on your repository,
-select your project, and initialize a configuration file. 
+in repos. 
+
+To start injecting environment variables, run eclipse on your repository,
+select a project, and initialize a configuration file. 
+
+Then run ${yellow(
+    'eclipse inject all node'
+)} and your project's environment variables
+should be available in the process.env object.
+
+To see more available commands, run ${yellow('eclipse help')}. Happy hacking!
+
 `;
 
 export const helpMessage = `
@@ -30,7 +40,7 @@ ${yellow(
 )} will inject only secrets with the web and staging classifiers.
 
 - ${green(
-    'eclipse ls/list <optional -classifiers>'
+    'eclipse ls/list <optional - classifiers>'
 )} - list the secrets of the project tagged in your working directory. Optionally, pass classifiers to only see a subset of your secrets.
 
 For example:
@@ -63,5 +73,5 @@ ${yellow(
     'eclipse remove MY_SECRET staging'
 )} will find the MY_SECRET secret with the web classifier and delete it
 
-To see this help log again, run ${green('eclipse help')}. Happy hacking!
+To see this help log again, run ${green('eclipse help')}
 `;

@@ -38,6 +38,7 @@ describe('main', () => {
             jest.spyOn(main as any, 'checkForCoreConfig').mockResolvedValueOnce(
                 false
             );
+
             jest.spyOn(authMock, 'checkIfAuthFlowRequired');
 
             const result = await main.execute();
@@ -47,7 +48,7 @@ describe('main', () => {
             expect(result).toBeTruthy();
         });
 
-        it('should return early true if auth flow required', async () => {
+        it('should return early true if user could not be logged in', async () => {
             process.argv = ['--arg1', '1', '--arg2', 'hello'];
 
             jest.spyOn(console, 'clear');
@@ -58,7 +59,7 @@ describe('main', () => {
             jest.spyOn(
                 authMock,
                 'checkIfAuthFlowRequired'
-            ).mockResolvedValueOnce(true);
+            ).mockResolvedValueOnce(false);
             jest.spyOn(apiMock, 'Initialize');
 
             const result = await main.execute();
@@ -66,7 +67,7 @@ describe('main', () => {
             expect(main['checkForCoreConfig']).toHaveBeenCalled();
             expect(authMock.checkIfAuthFlowRequired).toHaveBeenCalled();
             expect(apiMock.Initialize).not.toHaveBeenCalled();
-            expect(result).toBeTruthy();
+            expect(result).toBeFalsy();
         });
 
         it('should initialize api and show top level menu if not on project directory', async () => {
@@ -78,7 +79,7 @@ describe('main', () => {
             jest.spyOn(
                 authMock,
                 'checkIfAuthFlowRequired'
-            ).mockResolvedValueOnce(false);
+            ).mockResolvedValueOnce(true);
             jest.spyOn(apiMock, 'Initialize');
             jest.spyOn(
                 projectsMock,
@@ -107,7 +108,7 @@ describe('main', () => {
             jest.spyOn(
                 authMock,
                 'checkIfAuthFlowRequired'
-            ).mockResolvedValueOnce(false);
+            ).mockResolvedValueOnce(true);
             jest.spyOn(apiMock, 'Initialize');
             jest.spyOn(
                 projectsMock,
@@ -136,7 +137,7 @@ describe('main', () => {
             jest.spyOn(
                 authMock,
                 'checkIfAuthFlowRequired'
-            ).mockResolvedValueOnce(false);
+            ).mockResolvedValueOnce(true);
             jest.spyOn(apiMock, 'Initialize');
             jest.spyOn(
                 projectsMock,
