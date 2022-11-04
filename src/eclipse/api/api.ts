@@ -1,4 +1,5 @@
 import axios, { Axios } from 'axios';
+import { User } from 'eclipse/types/User.type';
 import { inject, injectable } from 'inversify';
 
 import Auth from '../auth/auth';
@@ -7,8 +8,9 @@ import CoreConfigModule from '../coreConfig';
 import { CreateSecretDto } from '../dtos/createSecret.dto';
 import { ApiConfig } from '../types/CoreConfig.type';
 import { Project } from '../types/Project.type';
-import { RevealedSecret } from '../types/Secret.type';
+import { RevealedSecret, Secret } from '../types/Secret.type';
 import { Logger } from '../utils/logger';
+import { ApiResponse } from '../types/ApiResponse.type';
 
 @injectable()
 export default class API {
@@ -51,8 +53,17 @@ export default class API {
         return this._http.post('/cli').then((res) => res.data);
     }
 
-    public async getUser() {
-        return this._http.get('/users').then((res) => res.data);
+    public async getUser(): Promise<User | null> {
+        return this._http
+            .get('/users')
+            .then((res) => {
+                const result: ApiResponse<User> = res.data;
+                return result.payload;
+            })
+            .catch(() => {
+                this.logger.error('Error when fetching user.');
+                return null;
+            });
     }
 
     public async getProjects(projectId?: string): Promise<Project[]> {
@@ -67,9 +78,16 @@ export default class API {
         return this._http
             .get('/projects', opts)
             .then((res) => {
-                return typeof res.data === 'string'
-                    ? JSON.parse(res.data)
-                    : res.data;
+                const { payload, statusCode, message }: ApiResponse<Project> =
+                    res.data;
+
+                if (statusCode !== 200) {
+                    throw new Error(message);
+                }
+
+                return typeof payload === 'string'
+                    ? JSON.parse(payload)
+                    : payload;
             })
             .catch((err) => {
                 this.logger.error(
@@ -92,7 +110,19 @@ export default class API {
                     classifiers,
                 },
             })
-            .then((res) => res.data)
+            .then((res) => {
+                const {
+                    payload,
+                    statusCode,
+                    message,
+                }: ApiResponse<RevealedSecret[]> = res.data;
+
+                if (statusCode !== 200) {
+                    throw new Error(message);
+                }
+
+                return payload;
+            })
             .catch((err) => {
                 this.logger.error(`Error attempting to fetch secrets: ${err}`);
                 return [];
@@ -102,7 +132,16 @@ export default class API {
     public async createSecret(createSecretDto: CreateSecretDto) {
         return this._http
             .post('/secrets', createSecretDto)
-            .then((res) => res.data)
+            .then((res) => {
+                const { payload, statusCode, message }: ApiResponse<Secret> =
+                    res.data;
+
+                if (statusCode !== 200) {
+                    throw new Error(message);
+                }
+
+                return payload;
+            })
             .catch((err) => {
                 this.logger.error(`Error attempting to create secret: ${err}`);
                 return null;
