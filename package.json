@@ -7,6 +7,9 @@
     "repository": "https://github.com/dlesage25/eclipse-cli.git",
     "author": "Daniel Lesage <me@daniellesage.com>",
     "license": "MIT",
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org/"
+    },
     "scripts": {
         "prepare": "npm run build",
         "start": "npm run build && npm run global",
