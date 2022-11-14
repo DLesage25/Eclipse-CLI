@@ -8,4 +8,4 @@
 
 Eclipse is an environment manager that injects sensitive configuration values into your code's execution context, removing the need for local environment files.
 
-For detailed installation and usage documentation, see the [EclipseJS docs](https://docs.eclipsejs.io).
+For detailed installation and usage documentation, see the [EclipseJS CLI docs](https://docs.eclipsejs.io/#/cli).
