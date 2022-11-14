@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import http from 'http';
 import url from 'url';
 import open from 'open';
+import sanitizeHtml from 'sanitize-html';
 import { inject, injectable } from 'inversify';
 
 import KeyChain from '../keychain';
@@ -185,15 +186,18 @@ export default class Auth {
             </html>
             `);
             } else {
-                res.write(`
+                res.write(
+                    `
             <html>
             <body>
                 <h1>LOGIN FAILED</h1>
-                <div>${error}</div>
-                <div>${error_description}
+                ${sanitizeHtml(`<div>${error}</div>`)}
+                ${sanitizeHtml(`<div>${error_description}</div>`)}
             </body>
             </html>
-            `);
+            `
+                );
+
                 return;
             }
             try {

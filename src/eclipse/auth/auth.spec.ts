@@ -262,7 +262,7 @@ describe('Auth', () => {
             <body>
                 <h1>LOGIN FAILED</h1>
                 <div>${'error'}</div>
-                <div>${'desc'}
+                <div>${'desc'}</div>
             </body>
             </html>
             `);
