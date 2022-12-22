@@ -11,6 +11,7 @@ import { Project } from '../types/Project.type';
 import { RevealedSecret, Secret } from '../types/Secret.type';
 import { Logger } from '../utils/logger';
 import { ApiResponse } from '../types/ApiResponse.type';
+import { GetSecretDto } from 'eclipse/dtos/getSecret.dto';
 
 @injectable()
 export default class API {
@@ -97,17 +98,19 @@ export default class API {
             });
     }
 
-    public async getSecrets(
-        projectId: string,
-        classifiers?: Array<string>
-    ): Promise<RevealedSecret[]> {
+    public async getSecrets({
+        projectId,
+        ownerId,
+        component,
+        environment,
+    }: GetSecretDto): Promise<RevealedSecret[]> {
         return this._http
             .get('/secrets/reveal', {
                 data: {
-                    project: {
-                        _id: projectId,
-                    },
-                    classifiers,
+                    projectId,
+                    ownerId,
+                    component,
+                    environment,
                 },
             })
             .then((res) => {

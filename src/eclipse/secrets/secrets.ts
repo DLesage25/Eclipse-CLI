@@ -14,8 +14,9 @@ export default class Secrets {
     ) {}
 
     public async addSecretFromMenu(project: Project) {
-        const { name, value, rawClassifiers } = await createSecretPrompt();
-        return this.addSecret(project, name, value, rawClassifiers);
+        const { name, value, environment, component } =
+            await createSecretPrompt();
+        return this.addSecret(project, name, value, environment, component);
     }
 
     public async removeSecretFromMenu(project: Project) {
@@ -31,26 +32,38 @@ export default class Secrets {
         project: Project,
         name: string,
         value: string,
-        rawClassifiers: string
+        environment: string,
+        component: string
     ) {
-        const classifiers = rawClassifiers.split(',').filter((i) => i !== '');
-        const { name: createdName } = await this._api.createSecret({
+        const createdSecret = await this._api.createSecret({
             projectId: project._id,
+            ownerId: project.ownerId,
             name,
             value,
-            classifiers,
+            environment,
+            component,
         });
+
+        if (!createdSecret) return;
+
         this.logger.success(
-            `Secret ${createdName} created under project ${project.name}.`
+            `Secret ${createdSecret.name} created under project ${project.name}.`
         );
+
         return;
     }
 
     public async getPartialSecrets(
         project: Project,
-        classifiers?: Array<string>
+        component: string,
+        environment: string
     ): Promise<void | { [key: string]: string }> {
-        const secrets = await this._api.getSecrets(project._id, classifiers);
+        const secrets = await this._api.getSecrets({
+            projectId: project._id,
+            ownerId: project.ownerId,
+            component,
+            environment,
+        });
 
         if (!secrets.length) {
             return;
@@ -70,9 +83,15 @@ export default class Secrets {
 
     public async getFullSecrets(
         project: Project,
-        classifiers?: Array<string>
+        component: string,
+        environment: string
     ): Promise<void | { [key: string]: RevealedSecret }> {
-        const secrets = await this._api.getSecrets(project._id, classifiers);
+        const secrets = await this._api.getSecrets({
+            projectId: project._id,
+            ownerId: project.ownerId,
+            component,
+            environment,
+        });
 
         if (!secrets.length) {
             return;

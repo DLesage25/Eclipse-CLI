@@ -4,6 +4,6 @@ export interface Project {
     _id: string;
     name: string;
     createdAt: string;
-    owner: string;
+    ownerId: string;
     secrets: Secret[];
 }

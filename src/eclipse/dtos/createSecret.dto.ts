@@ -1,6 +1,8 @@
 export interface CreateSecretDto {
-    value: string;
-    projectId: string;
     name: string;
-    classifiers: Array<string>;
+    value: string;
+    environment: string;
+    component: string;
+    projectId: string;
+    ownerId: string;
 }
