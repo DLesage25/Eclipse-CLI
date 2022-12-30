@@ -12,6 +12,7 @@ import { RevealedSecret, Secret } from '../types/Secret.type';
 import { Logger } from '../utils/logger';
 import { ApiResponse } from '../types/ApiResponse.type';
 import { GetSecretDto } from 'eclipse/dtos/getSecret.dto';
+import { DeleteSecretDto } from 'eclipse/dtos/deleteSecret.dto';
 
 @injectable()
 export default class API {
@@ -151,7 +152,7 @@ export default class API {
             });
     }
 
-    public async deleteSecret(secretId: string, secretName: string) {
+    public async deleteSecret({ secretId, secretName }: DeleteSecretDto) {
         return this._http
             .delete(`/secrets/${secretId}`)
             .then(() => {

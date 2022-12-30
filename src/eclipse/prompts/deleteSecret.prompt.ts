@@ -4,7 +4,10 @@ import { Secret } from '../types/Secret.type';
 export default function deleteSecretPrompt(secrets: Secret[]) {
     const secretChoices = secrets.map((s) => ({
         name: s.name,
-        value: { _id: s._id, name: s.name },
+        value: {
+            _id: s._id,
+            name: s.name,
+        },
         short: s.name,
     }));
 

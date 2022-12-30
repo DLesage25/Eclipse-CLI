@@ -27,7 +27,7 @@ export default class Projects {
     private projectActions(action: string, project: Project) {
         switch (action) {
             case 'view':
-                return this.viewProjectSecrets(project);
+                return this.viewProjectSecretsFromMenu(project);
             case 'add':
                 return this.secrets.addSecretFromMenu(project);
             case 'remove':
@@ -87,7 +87,7 @@ export default class Projects {
         return this.projectActions(action, project);
     }
 
-    public async viewProjectSecrets(project: Project) {
+    public async viewProjectSecretsFromMenu(project: Project) {
         const { component } = await componentSelectionPrompt(project.secrets);
 
         const availableSecrets = project.secrets.filter(
@@ -98,6 +98,42 @@ export default class Projects {
             availableSecrets
         );
 
+        const secrets = await this.secrets.getFullSecrets(
+            project,
+            component,
+            environment
+        );
+
+        if (!secrets) {
+            this.logger.warning(
+                `No secrets found for project ${project.name}: component ${component} and environment ${environment}`
+            );
+            return;
+        }
+
+        const formattedSecrets = Object.entries(secrets).map(
+            ([secretName, secret]) => [
+                secretName,
+                secret.value,
+                secret.created_at,
+            ]
+        );
+
+        const secretTable = new Table({
+            head: ['Name', 'Value', 'Created'],
+            colWidths: [30, 30, 40],
+            rows: formattedSecrets,
+        });
+
+        this.logger.success(secretTable.toString());
+        return;
+    }
+
+    public async viewProjectSecrets(
+        project: Project,
+        component: string,
+        environment: string
+    ) {
         const secrets = await this.secrets.getFullSecrets(
             project,
             component,

@@ -1,3 +1,4 @@
+import { DeleteSecretDto } from 'eclipse/dtos/deleteSecret.dto';
 import { inject, injectable } from 'inversify';
 import API from '../api';
 import createSecretPrompt from '../prompts/createSecret.prompt';
@@ -25,15 +26,18 @@ export default class Secrets {
             this.logger.message('Aborted.');
             return;
         }
-        return this.removeSecret(secret);
+        return this.removeSecret({
+            secretId: secret._id,
+            secretName: secret.name,
+        });
     }
 
     public async addSecret(
         project: Project,
         name: string,
         value: string,
-        environment: string,
-        component: string
+        component: string,
+        environment: string
     ) {
         const createdSecret = await this._api.createSecret({
             projectId: project._id,
@@ -107,7 +111,7 @@ export default class Secrets {
         return secretsWithName;
     }
 
-    public async removeSecret(secret: { _id: string; name: string }) {
-        return this._api.deleteSecret(secret._id, secret.name);
+    public async removeSecret(deleteSecretDto: DeleteSecretDto) {
+        return this._api.deleteSecret(deleteSecretDto);
     }
 }

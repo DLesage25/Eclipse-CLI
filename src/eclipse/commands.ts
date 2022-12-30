@@ -88,18 +88,27 @@ export class Commands {
     private async processRemoveCommand(
         postArguments: Array<string>
     ): Promise<boolean> {
-        const [secretName, rawClassifiers] = postArguments;
-        const classifiers = rawClassifiers
-            ? rawClassifiers.split(',').filter((i) => i !== '')
-            : undefined;
+        const [removeArgs, secretName] = postArguments;
 
+        if (!removeArgs.includes('/')) {
+            this.logger.error(
+                'Please specify a component and environment: `eclipse rm component/environment secret_name`'
+            );
+            return false;
+        }
+
+        const [component, environment] = removeArgs.split('/');
         const project = await this.getCurrentProject();
 
         if (!project) {
             return false;
         }
 
-        const secrets = await this.secrets.getFullSecrets(project, classifiers);
+        const secrets = await this.secrets.getFullSecrets(
+            project,
+            component,
+            environment
+        );
 
         if (!secrets) {
             return false;
@@ -123,7 +132,10 @@ export class Commands {
             return false;
         }
 
-        await this.secrets.removeSecret(secret);
+        await this.secrets.removeSecret({
+            secretId: secret._id,
+            secretName,
+        });
 
         return true;
     }
@@ -143,10 +155,16 @@ export class Commands {
     private async processListCommand(
         postArguments: Array<string>
     ): Promise<boolean> {
-        const [rawClassifiers] = postArguments;
-        const classifiers = rawClassifiers
-            ? rawClassifiers.split(',').filter((i) => i !== '')
-            : undefined;
+        const [listArgs] = postArguments;
+
+        if (!listArgs) {
+            this.logger.error(
+                'Please specify a component and environment: `eclipse ls component/environment`.'
+            );
+            return false;
+        }
+
+        const [component, environment] = listArgs.split('/');
 
         const project = await this.getCurrentProject();
 
@@ -154,7 +172,7 @@ export class Commands {
             return false;
         }
 
-        await this.projects.viewProjectSecrets(project, classifiers);
+        await this.projects.viewProjectSecrets(project, component, environment);
 
         return true;
     }
@@ -162,7 +180,16 @@ export class Commands {
     private async processAddCommand(
         postArguments: Array<string>
     ): Promise<boolean> {
-        const [secretName, secretValue, rawClassifiers] = postArguments;
+        const [addArgs, secretName, secretValue] = postArguments;
+
+        if (!addArgs.includes('/')) {
+            this.logger.error(
+                'Please specify a component and environment: `eclipse add component/environment secret_name secret_value`'
+            );
+            return false;
+        }
+
+        const [component, environment] = addArgs.split('/');
 
         const project = await this.getCurrentProject();
 
@@ -174,7 +201,8 @@ export class Commands {
             project,
             secretName,
             secretValue,
-            rawClassifiers
+            component,
+            environment
         );
         return true;
     }
@@ -184,15 +212,20 @@ export class Commands {
     ): Promise<boolean> {
         const [injectArg, coreProcess, ...processArgs] = postArguments;
 
-        const classifiers =
-            injectArg !== 'all'
-                ? injectArg.split(',').filter((i) => i !== '')
-                : undefined;
+        if (!injectArg.includes('/')) {
+            this.logger.error(
+                'Please specify a component and environment: `eclipse i component/environment node`'
+            );
+            return false;
+        }
+
+        const [component, environment] = injectArg.split('/');
 
         await this.projects.injectLocalProjectSecrets(
             coreProcess,
             processArgs,
-            classifiers
+            component,
+            environment
         );
 
         return true;
