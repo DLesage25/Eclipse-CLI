@@ -87,7 +87,9 @@ describe('fileUtil', () => {
             jest.spyOn(fileUtil, 'find');
             jest.spyOn(fileUtil, 'replaceOnFile').mockResolvedValueOnce(true);
 
-            const result = await fileUtil.createOrUpdate({ test2: 345 });
+            const result = await fileUtil.createOrUpdate({
+                data: { test2: 345 },
+            });
 
             expect(fileUtil.find).toHaveBeenCalled();
             expect(fileUtil.replaceOnFile).toHaveBeenCalled();
@@ -101,10 +103,15 @@ describe('fileUtil', () => {
             jest.spyOn(fileUtil, 'writeFile').mockResolvedValueOnce(true);
             jest.spyOn(fileUtil, 'find');
 
-            const result = await fileUtil.createOrUpdate({ test2: 345 });
+            const result = await fileUtil.createOrUpdate({
+                data: { test2: 345 },
+            });
 
             expect(fileUtil.find).toHaveBeenCalled();
-            expect(fileUtil.writeFile).toHaveBeenCalledWith('test2=345\n');
+            expect(fileUtil.writeFile).toHaveBeenCalledWith(
+                'test2=345\n',
+                undefined
+            );
 
             expect(result).toBeTruthy();
         });

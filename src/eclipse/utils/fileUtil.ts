@@ -12,9 +12,13 @@ export class FileUtil {
         this.FILE_PATH = filePath;
     }
 
-    public async find() {
+    public async find(typeSuffix?: string) {
+        const fileName = typeSuffix
+            ? `${this.FILE_PATH}.${typeSuffix}`
+            : this.FILE_PATH;
+
         try {
-            const stats = await fs.stat(this.FILE_PATH);
+            const stats = await fs.stat(fileName);
             if (stats) {
                 return true;
             }
@@ -24,20 +28,29 @@ export class FileUtil {
         }
     }
 
-    public async writeFile(data: string) {
+    public async writeFile(data: string, typeSuffix?: string) {
+        const fileName = typeSuffix
+            ? `${this.FILE_PATH}.${typeSuffix}`
+            : this.FILE_PATH;
+
         try {
-            return fs.writeFile(this.FILE_PATH, data).then(() => true);
+            return fs.writeFile(fileName, data).then(() => true);
         } catch (e) {
             console.error(e);
             return false;
         }
     }
 
-    public async createOrUpdate(
-        data: KeyValues,
-        fileComment?: string
-    ): Promise<boolean> {
-        const exists = await this.find();
+    public async createOrUpdate({
+        data,
+        fileComment,
+        typeSuffix,
+    }: {
+        data: KeyValues;
+        fileComment?: string;
+        typeSuffix?: string;
+    }): Promise<boolean> {
+        const exists = await this.find(typeSuffix);
 
         if (exists) {
             return this.replaceOnFile(data);
@@ -47,7 +60,7 @@ export class FileUtil {
         const fileData = fileComment
             ? `${fileComment}\n${fileNotation}`
             : fileNotation;
-        return this.writeFile(fileData);
+        return this.writeFile(fileData, typeSuffix);
     }
 
     public async read(): Promise<string> {
