@@ -17,7 +17,7 @@ export default class Secrets {
     public async addSecretFromMenu(project: Project) {
         const { name, value, environment, component } =
             await createSecretPrompt();
-        return this.addSecret(project, name, value, environment, component);
+        return this.addSecret(project, name, value, component, environment);
     }
 
     public async removeSecretFromMenu(project: Project) {
