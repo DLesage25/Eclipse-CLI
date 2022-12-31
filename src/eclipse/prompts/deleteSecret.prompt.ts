@@ -3,7 +3,7 @@ import { Secret } from '../types/Secret.type';
 
 export default function deleteSecretPrompt(secrets: Secret[]) {
     const secretChoices = secrets.map((s) => ({
-        name: s.name,
+        name: `${s.name} - ${s.component}/${s.environment}`,
         value: {
             _id: s._id,
             name: s.name,
