@@ -14,9 +14,13 @@ export default function createSecretPrompt() {
         },
         {
             type: 'input',
-            name: 'rawClassifiers',
-            message:
-                'Classifiers let you order secrets based on categories. Please separate classifiers with a comma (e.g. web,production)',
+            name: 'component',
+            message: "Set this secret's component",
+        },
+        {
+            type: 'input',
+            name: 'environment',
+            message: "Set this secret's environment",
         },
     ]);
 }
