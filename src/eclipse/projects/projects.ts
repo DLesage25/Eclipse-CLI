@@ -173,6 +173,13 @@ export default class Projects {
             (s) => s.component === component
         );
 
+        if (!availableSecrets) {
+            this.logger.warning(
+                `No secrets found under ${component} component.`
+            );
+            return;
+        }
+
         const { environment } = await environmentSelectionPrompt(
             availableSecrets
         );

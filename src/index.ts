@@ -1,8 +1,4 @@
 import 'reflect-metadata';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 import { Container } from 'inversify';
 
 import Main from './eclipse/main';

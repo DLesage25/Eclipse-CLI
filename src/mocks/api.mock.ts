@@ -23,10 +23,12 @@ export class ApiMock {
         return [];
     }
 
-    public async getSecrets(
-        projectId: string,
-        classifiers?: string[] | undefined
-    ): Promise<RevealedSecret[]> {
+    public async getSecrets(opts: {
+        projectId: string;
+        ownerId: string;
+        component: string;
+        environment: string;
+    }): Promise<RevealedSecret[]> {
         return [];
     }
 
@@ -34,10 +36,10 @@ export class ApiMock {
         return;
     }
 
-    public async deleteSecret(
-        secretId: string,
-        secretName: string
-    ): Promise<void | null> {
+    public async deleteSecret(opts: {
+        secretId: string;
+        secretName: string;
+    }): Promise<void | null> {
         return;
     }
 }
