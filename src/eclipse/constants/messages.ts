@@ -28,50 +28,43 @@ ${underline('General commands')}
 ${underline('Project commands')}
 
 - ${green(
-    'eclipse i/inject <all | comma-separated classifiers> <process>'
+    'eclipse i/inject component/environment <process>'
 )} - inject secrets unto an execution context
 
 For example: 
 ${yellow(
-    'eclipse i all npm start'
-)} will inject all secrets into your node execution.
+    'eclipse i api/staging npm start'
+)} will inject secrets created for the API component under the staging environment into your node execution.
 ${yellow(
-    'eclipse inject web,staging npm start'
-)} will inject only secrets with the web and staging classifiers.
+    'eclipse inject web/prod npm start'
+)} will inject secrets for the web component under the prod environment.
 
 - ${green(
-    'eclipse ls/list <optional - classifiers>'
-)} - list the secrets of the project tagged in your working directory. Optionally, pass classifiers to only see a subset of your secrets.
-
-For example:
-${yellow('eclipse ls')} will list all secrets
-${yellow(
-    'eclipse list web,staging'
-)} will list secrets with the web and staging classifiers
-
-- ${green(
-    'eclipse a/add <secretname> <secretvalue> <classifiers>'
-)} - create a secret under the project tagged in your working directory
+    'eclipse ls/list component/environment'
+)} - list the secrets of the project tagged in your working directory, for the given component and environment.
 
 For example:
 ${yellow(
-    'eclipse a MY_SECRET MY_TOKEN api,production'
-)} will create MY_SECRET and assign api and production classifiers
-${yellow(
-    'eclipse add MY_SECRET MY_TOKEN web'
-)} will create MY_SECRET and add the web classifier
+    'eclipse ls api/staging'
+)} will list all staging secrets for the API component.
 
 - ${green(
-    'eclipse rm/remove <secretname> <optional - classifiers>'
-)} - delete a secret under the project tagged in your working directory
+    'eclipse a/add component/environment <secretname> <secretvalue>'
+)} - create a secret under the given component and environment for the project in your working directory.
 
 For example:
 ${yellow(
-    'eclipse rm MY_SECRET'
-)} will find the first secret called MY_SECRET and delete it
+    'eclipse a api/staging MY_SECRET MY_TOKEN'
+)} will create MY_SECRET for the api component under the staging environment
+
+- ${green(
+    'eclipse rm/remove component/environment <secretname>'
+)} - delete a secret under the given component and environment.
+
+For example:
 ${yellow(
-    'eclipse remove MY_SECRET staging'
-)} will find the MY_SECRET secret with the web classifier and delete it
+    'eclipse rm api/staging MY_SECRET'
+)} will delete MY_SECRET under the api component and staging environment.
 
 To see this help log again, run ${green('eclipse help')}
 `;

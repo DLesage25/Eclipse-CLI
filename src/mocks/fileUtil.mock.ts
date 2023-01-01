@@ -12,14 +12,18 @@ export class FileUtilMock {
         return true;
     }
 
-    public async writeFile(data: string): Promise<boolean> {
+    public async writeFile(
+        data: string,
+        typeSuffix?: string
+    ): Promise<boolean> {
         return true;
     }
 
-    public async createOrUpdate(
-        data: KeyValues,
-        fileComment?: string
-    ): Promise<boolean> {
+    public async createOrUpdate(opts: {
+        data: KeyValues;
+        fileComment?: string;
+        typeSuffix?: string;
+    }): Promise<boolean> {
         return true;
     }
 

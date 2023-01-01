@@ -80,7 +80,7 @@ export default class Main {
         }
 
         if (isInProjectDirectory) await this.projects.projectDirectoryMenu();
-        if (!isInProjectDirectory) await this.showTopLevelMenu();
+        else await this.showTopLevelMenu();
 
         return true;
     }

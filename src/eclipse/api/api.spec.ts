@@ -242,17 +242,19 @@ describe('API', () => {
                     ],
                 },
             });
-            const result = await api.getSecrets('projectId', [
-                'classifier1',
-                'classifier2',
-            ]);
+            const result = await api.getSecrets({
+                projectId: 'projectId',
+                ownerId: 'ownerId',
+                component: 'component',
+                environment: 'environment',
+            });
 
             expect(mockGet).toHaveBeenCalledWith('/secrets/reveal', {
                 data: {
-                    project: {
-                        _id: 'projectId',
-                    },
-                    classifiers: ['classifier1', 'classifier2'],
+                    projectId: 'projectId',
+                    ownerId: 'ownerId',
+                    component: 'component',
+                    environment: 'environment',
                 },
             });
             expect(result).toEqual([{ _id: 'secret' }] as RevealedSecret[]);
@@ -260,17 +262,19 @@ describe('API', () => {
         it('should error log and return empty array if get request fails', async () => {
             mockGet.mockRejectedValueOnce('error');
             jest.spyOn(loggerMock, 'error');
-            const result = await api.getSecrets('projectId', [
-                'classifier1',
-                'classifier2',
-            ]);
+            const result = await api.getSecrets({
+                projectId: 'projectId',
+                ownerId: 'ownerId',
+                component: 'component',
+                environment: 'environment',
+            });
 
             expect(mockGet).toHaveBeenCalledWith('/secrets/reveal', {
                 data: {
-                    project: {
-                        _id: 'projectId',
-                    },
-                    classifiers: ['classifier1', 'classifier2'],
+                    projectId: 'projectId',
+                    ownerId: 'ownerId',
+                    component: 'component',
+                    environment: 'environment',
                 },
             });
             expect(loggerMock.error).toHaveBeenCalled();
@@ -327,14 +331,20 @@ describe('API', () => {
 
         it('should delete to secrets endpoint with given projectId and secret name', async () => {
             mockDelete.mockResolvedValueOnce(true);
-            await api.deleteSecret('secretId', 'secretName');
+            await api.deleteSecret({
+                secretId: 'secretId',
+                secretName: 'secretName',
+            });
 
             expect(mockDelete).toHaveBeenCalledWith('/secrets/secretId');
         });
         it('should error log and return null if get request fails', async () => {
             mockDelete.mockRejectedValueOnce(true);
             jest.spyOn(loggerMock, 'error');
-            const result = await api.deleteSecret('secretId', 'secretName');
+            const result = await api.deleteSecret({
+                secretId: 'secretId',
+                secretName: 'secretName',
+            });
 
             expect(mockDelete).toHaveBeenCalledWith('/secrets/secretId');
             expect(loggerMock.error).toHaveBeenCalled();

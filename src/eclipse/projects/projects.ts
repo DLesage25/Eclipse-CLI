@@ -1,14 +1,17 @@
 import { inject, injectable } from 'inversify';
 import Table from 'cli-table';
+
 import API from '../api';
 import Shell from '../shell';
 import ProjectConfig from '../projectConfig';
 import projectSelectionPrompt from '../prompts/projectSelection.prompt';
 import singleProjectActionPrompt from '../prompts/singleProjectAction.prompt';
+import componentSelectionPrompt from '../prompts/componentSelection.prompt';
+import environmentSelectionPrompt from '../prompts/environmentSelection.prompt';
 import Secrets from '../secrets';
-import { Project } from '../types/Project.type';
 import { FileUtil } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
+import { Project } from '../types/Project.type';
 import { helpMessage } from '../constants/messages';
 
 @injectable()
@@ -25,7 +28,7 @@ export default class Projects {
     private projectActions(action: string, project: Project) {
         switch (action) {
             case 'view':
-                return this.viewProjectSecrets(project);
+                return this.viewProjectSecretsFromMenu(project);
             case 'add':
                 return this.secrets.addSecretFromMenu(project);
             case 'remove':
@@ -85,14 +88,27 @@ export default class Projects {
         return this.projectActions(action, project);
     }
 
-    public async viewProjectSecrets(
-        project: Project,
-        classifiers?: Array<string>
-    ) {
-        const secrets = await this.secrets.getFullSecrets(project, classifiers);
+    public async viewProjectSecretsFromMenu(project: Project) {
+        const { component } = await componentSelectionPrompt(project.secrets);
+
+        const availableSecrets = project.secrets.filter(
+            (s) => s.component === component
+        );
+
+        const { environment } = await environmentSelectionPrompt(
+            availableSecrets
+        );
+
+        const secrets = await this.secrets.getFullSecrets(
+            project,
+            component,
+            environment
+        );
 
         if (!secrets) {
-            this.logger.warning(`No secrets found for project ${project.name}`);
+            this.logger.warning(
+                `No secrets found for project ${project.name}: component ${component} and environment ${environment}`
+            );
             return;
         }
 
@@ -100,14 +116,49 @@ export default class Projects {
             ([secretName, secret]) => [
                 secretName,
                 secret.value,
-                secret.classifiers.join(','),
                 secret.created_at,
             ]
         );
 
         const secretTable = new Table({
-            head: ['Name', 'Value', 'Classifiers', 'Created'],
-            colWidths: [30, 30, 20, 25],
+            head: ['Name', 'Value', 'Created'],
+            colWidths: [30, 30, 40],
+            rows: formattedSecrets,
+        });
+
+        this.logger.success(secretTable.toString());
+        return;
+    }
+
+    public async viewProjectSecrets(
+        project: Project,
+        component: string,
+        environment: string
+    ) {
+        const secrets = await this.secrets.getFullSecrets(
+            project,
+            component,
+            environment
+        );
+
+        if (!secrets) {
+            this.logger.warning(
+                `No secrets found for project ${project.name}: component ${component} and environment ${environment}`
+            );
+            return;
+        }
+
+        const formattedSecrets = Object.entries(secrets).map(
+            ([secretName, secret]) => [
+                secretName,
+                secret.value,
+                secret.created_at,
+            ]
+        );
+
+        const secretTable = new Table({
+            head: ['Name', 'Value', 'Created'],
+            colWidths: [30, 30, 40],
             rows: formattedSecrets,
         });
 
@@ -116,15 +167,43 @@ export default class Projects {
     }
 
     private async printSecrets(project: Project) {
-        const secrets = await this.secrets.getPartialSecrets(project);
+        const { component } = await componentSelectionPrompt(project.secrets);
+
+        const availableSecrets = project.secrets.filter(
+            (s) => s.component === component
+        );
+
+        if (!availableSecrets) {
+            this.logger.warning(
+                `No secrets found under ${component} component.`
+            );
+            return;
+        }
+
+        const { environment } = await environmentSelectionPrompt(
+            availableSecrets
+        );
+
+        const secrets = await this.secrets.getPartialSecrets(
+            project,
+            component,
+            environment
+        );
 
         if (!secrets) {
             this.logger.warning(`No secrets found for project ${project.name}`);
             return;
         }
 
-        await this.envFile.createOrUpdate(secrets);
-        this.logger.success('Environment file printed on working directory.');
+        await this.envFile.createOrUpdate({
+            data: secrets,
+            typeSuffix: environment,
+            fileComment: '# Environment file generated by EclipseJS',
+        });
+
+        this.logger.success(
+            `.env file for ${environment} environment printed on working directory.`
+        );
         return;
     }
 
@@ -166,14 +245,18 @@ export default class Projects {
         return this.getProject(configData.PROJECT);
     }
 
-    public async getCurrentProjectSecrets(classifiers?: string[]) {
+    public async getCurrentProjectSecrets(
+        component: string,
+        environment: string
+    ) {
         const project = await this.getCurrentProject();
 
         if (!project) return;
 
         const secrets = await this.secrets.getPartialSecrets(
             project,
-            classifiers
+            component,
+            environment
         );
 
         if (!secrets) {
@@ -187,9 +270,13 @@ export default class Projects {
     public async injectLocalProjectSecrets(
         coreProcess: string,
         processArgs: string[],
-        classifiers?: string[]
+        component: string,
+        environment: string
     ) {
-        const secrets = await this.getCurrentProjectSecrets(classifiers);
+        const secrets = await this.getCurrentProjectSecrets(
+            component,
+            environment
+        );
         return this.shell.initialize(coreProcess, processArgs, secrets || {});
     }
 }

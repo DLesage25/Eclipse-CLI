@@ -39,7 +39,8 @@ describe('secrets', () => {
             mockCreateSecretPrompt.mockResolvedValueOnce({
                 name: 'name',
                 value: 'value',
-                rawClassifiers: 'test,test2',
+                component: 'component',
+                environment: 'environment',
             });
 
             await secrets.addSecretFromMenu({ _id: '123' } as Project);
@@ -49,7 +50,8 @@ describe('secrets', () => {
                 { _id: '123' } as Project,
                 'name',
                 'value',
-                'test,test2'
+                'component',
+                'environment'
             );
         });
     });
@@ -92,8 +94,8 @@ describe('secrets', () => {
 
             expect(mockDeleteSecretPrompt).toHaveBeenCalled();
             expect(secrets.removeSecret).toHaveBeenCalledWith({
-                _id: 'id',
-                name: 'name',
+                secretId: 'id',
+                secretName: 'name',
             });
         });
     });
@@ -112,17 +114,20 @@ describe('secrets', () => {
             );
 
             await secrets.addSecret(
-                { _id: '123' } as Project,
+                { _id: '123', ownerId: 'ownerId' } as Project,
                 'secret',
                 'value',
-                'test1,test2'
+                'component',
+                'environment'
             );
 
             expect(apiMock.createSecret).toHaveBeenCalledWith({
                 projectId: '123',
                 name: 'secret',
                 value: 'value',
-                classifiers: ['test1', 'test2'],
+                component: 'component',
+                environment: 'environment',
+                ownerId: 'ownerId',
             });
         });
     });
@@ -139,14 +144,17 @@ describe('secrets', () => {
             );
 
             const result = await secrets.getPartialSecrets(
-                { _id: '123' } as Project,
-                ['test1', 'test2']
+                { _id: '123', ownerId: 'ownerId' } as Project,
+                'component',
+                'environment'
             );
 
-            expect(apiMock.getSecrets).toHaveBeenCalledWith('123', [
-                'test1',
-                'test2',
-            ]);
+            expect(apiMock.getSecrets).toHaveBeenCalledWith({
+                projectId: '123',
+                ownerId: 'ownerId',
+                component: 'component',
+                environment: 'environment',
+            });
 
             expect(result).toBeUndefined();
         });
@@ -161,14 +169,17 @@ describe('secrets', () => {
             );
 
             const result = await secrets.getPartialSecrets(
-                { _id: '123' } as Project,
-                ['test1', 'test2']
+                { _id: '123', ownerId: 'ownerId' } as Project,
+                'component',
+                'environment'
             );
 
-            expect(apiMock.getSecrets).toHaveBeenCalledWith('123', [
-                'test1',
-                'test2',
-            ]);
+            expect(apiMock.getSecrets).toHaveBeenCalledWith({
+                projectId: '123',
+                component: 'component',
+                environment: 'environment',
+                ownerId: 'ownerId',
+            });
 
             expect(result).toEqual({
                 test1: 'value1',
@@ -189,14 +200,17 @@ describe('secrets', () => {
             );
 
             const result = await secrets.getFullSecrets(
-                { _id: '123' } as Project,
-                ['test1', 'test2']
+                { _id: '123', ownerId: 'ownerId' } as Project,
+                'component',
+                'environment'
             );
 
-            expect(apiMock.getSecrets).toHaveBeenCalledWith('123', [
-                'test1',
-                'test2',
-            ]);
+            expect(apiMock.getSecrets).toHaveBeenCalledWith({
+                projectId: '123',
+                ownerId: 'ownerId',
+                component: 'component',
+                environment: 'environment',
+            });
 
             expect(result).toBeUndefined();
         });
@@ -211,14 +225,17 @@ describe('secrets', () => {
             );
 
             const result = await secrets.getFullSecrets(
-                { _id: '123' } as Project,
-                ['test1', 'test2']
+                { _id: '123', ownerId: 'ownerId' } as Project,
+                'component',
+                'environment'
             );
 
-            expect(apiMock.getSecrets).toHaveBeenCalledWith('123', [
-                'test1',
-                'test2',
-            ]);
+            expect(apiMock.getSecrets).toHaveBeenCalledWith({
+                projectId: '123',
+                ownerId: 'ownerId',
+                component: 'component',
+                environment: 'environment',
+            });
 
             expect(result).toEqual({
                 test1: {
@@ -244,11 +261,14 @@ describe('secrets', () => {
             );
 
             await secrets.removeSecret({
-                _id: '123',
-                name: 'name',
+                secretId: '123',
+                secretName: 'name',
             });
 
-            expect(apiMock.deleteSecret).toHaveBeenCalledWith('123', 'name');
+            expect(apiMock.deleteSecret).toHaveBeenCalledWith({
+                secretId: '123',
+                secretName: 'name',
+            });
         });
     });
 });

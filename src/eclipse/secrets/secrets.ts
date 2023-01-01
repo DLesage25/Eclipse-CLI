@@ -1,3 +1,4 @@
+import { DeleteSecretDto } from 'eclipse/dtos/deleteSecret.dto';
 import { inject, injectable } from 'inversify';
 import API from '../api';
 import createSecretPrompt from '../prompts/createSecret.prompt';
@@ -14,8 +15,9 @@ export default class Secrets {
     ) {}
 
     public async addSecretFromMenu(project: Project) {
-        const { name, value, rawClassifiers } = await createSecretPrompt();
-        return this.addSecret(project, name, value, rawClassifiers);
+        const { name, value, environment, component } =
+            await createSecretPrompt();
+        return this.addSecret(project, name, value, component, environment);
     }
 
     public async removeSecretFromMenu(project: Project) {
@@ -24,33 +26,48 @@ export default class Secrets {
             this.logger.message('Aborted.');
             return;
         }
-        return this.removeSecret(secret);
+        return this.removeSecret({
+            secretId: secret._id,
+            secretName: secret.name,
+        });
     }
 
     public async addSecret(
         project: Project,
         name: string,
         value: string,
-        rawClassifiers: string
+        component: string,
+        environment: string
     ) {
-        const classifiers = rawClassifiers.split(',').filter((i) => i !== '');
-        const { name: createdName } = await this._api.createSecret({
+        const createdSecret = await this._api.createSecret({
             projectId: project._id,
+            ownerId: project.ownerId,
             name,
             value,
-            classifiers,
+            environment,
+            component,
         });
+
+        if (!createdSecret) return;
+
         this.logger.success(
-            `Secret ${createdName} created under project ${project.name}.`
+            `Secret ${createdSecret.name} created under project ${project.name}.`
         );
+
         return;
     }
 
     public async getPartialSecrets(
         project: Project,
-        classifiers?: Array<string>
+        component: string,
+        environment: string
     ): Promise<void | { [key: string]: string }> {
-        const secrets = await this._api.getSecrets(project._id, classifiers);
+        const secrets = await this._api.getSecrets({
+            projectId: project._id,
+            ownerId: project.ownerId,
+            component,
+            environment,
+        });
 
         if (!secrets.length) {
             return;
@@ -70,9 +87,15 @@ export default class Secrets {
 
     public async getFullSecrets(
         project: Project,
-        classifiers?: Array<string>
+        component: string,
+        environment: string
     ): Promise<void | { [key: string]: RevealedSecret }> {
-        const secrets = await this._api.getSecrets(project._id, classifiers);
+        const secrets = await this._api.getSecrets({
+            projectId: project._id,
+            ownerId: project.ownerId,
+            component,
+            environment,
+        });
 
         if (!secrets.length) {
             return;
@@ -88,7 +111,7 @@ export default class Secrets {
         return secretsWithName;
     }
 
-    public async removeSecret(secret: { _id: string; name: string }) {
-        return this._api.deleteSecret(secret._id, secret.name);
+    public async removeSecret(deleteSecretDto: DeleteSecretDto) {
+        return this._api.deleteSecret(deleteSecretDto);
     }
 }
