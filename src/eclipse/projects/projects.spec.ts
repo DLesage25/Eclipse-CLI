@@ -1,5 +1,5 @@
 import { Project } from 'eclipse/types/Project.type';
-import { RevealedSecret, Secret } from 'eclipse/types/Secret.type';
+import { RevealedSecret } from 'eclipse/types/Secret.type';
 import 'reflect-metadata';
 
 import { ApiMock } from '../../mocks/api.mock';
@@ -360,7 +360,7 @@ describe('projects', () => {
             ).mockResolvedValueOnce({});
             jest.spyOn(loggerMock, 'error');
 
-            await projects.getCurrentProject();
+            await projects.getCurrentContext();
 
             expect(projectConfigMock.readConfigFile).toHaveBeenCalled();
             expect(loggerMock.error).toHaveBeenCalled();
@@ -374,7 +374,7 @@ describe('projects', () => {
             });
             jest.spyOn(projects as any, 'getProject');
 
-            await projects.getCurrentProject();
+            await projects.getCurrentContext();
 
             expect(projectConfigMock.readConfigFile).toHaveBeenCalled();
             expect(projects['getProject']).toHaveBeenCalledWith('123');
@@ -388,20 +388,23 @@ describe('projects', () => {
         });
 
         it('should return early if no project is found', async () => {
-            jest.spyOn(projects, 'getCurrentProject').mockResolvedValueOnce(
+            jest.spyOn(projects, 'getCurrentContext').mockResolvedValueOnce(
                 undefined
             );
             jest.spyOn(secretsMock, 'getPartialSecrets');
 
             await projects.getCurrentProjectSecrets('component', 'environment');
 
-            expect(projects.getCurrentProject).toHaveBeenCalled();
+            expect(projects.getCurrentContext).toHaveBeenCalled();
             expect(secretsMock.getPartialSecrets).not.toHaveBeenCalled();
         });
         it('should return early if no secrets are found', async () => {
-            jest.spyOn(projects, 'getCurrentProject').mockResolvedValueOnce({
-                _id: '123',
-            } as Project);
+            jest.spyOn(projects, 'getCurrentContext').mockResolvedValueOnce({
+                project: {
+                    _id: '123',
+                } as Project,
+                component: 'component',
+            });
             jest.spyOn(
                 secretsMock,
                 'getPartialSecrets'
@@ -410,15 +413,18 @@ describe('projects', () => {
 
             await projects.getCurrentProjectSecrets('component', 'environment');
 
-            expect(projects.getCurrentProject).toHaveBeenCalled();
+            expect(projects.getCurrentContext).toHaveBeenCalled();
             expect(secretsMock.getPartialSecrets).toHaveBeenCalled();
             expect(loggerMock.warning).toHaveBeenCalled();
         });
 
         it('should return secrets if project and secrets found', async () => {
-            jest.spyOn(projects, 'getCurrentProject').mockResolvedValueOnce({
-                _id: '123',
-            } as Project);
+            jest.spyOn(projects, 'getCurrentContext').mockResolvedValueOnce({
+                project: {
+                    _id: '123',
+                } as Project,
+                component: 'component',
+            });
             jest.spyOn(secretsMock, 'getPartialSecrets').mockResolvedValueOnce({
                 name: 'true',
             });
@@ -428,7 +434,7 @@ describe('projects', () => {
                 'environment'
             );
 
-            expect(projects.getCurrentProject).toHaveBeenCalled();
+            expect(projects.getCurrentContext).toHaveBeenCalled();
             expect(secretsMock.getPartialSecrets).toHaveBeenCalled();
             expect(result).toEqual({
                 name: 'true',

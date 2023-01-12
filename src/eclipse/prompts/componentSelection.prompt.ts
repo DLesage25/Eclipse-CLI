@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import { Secret } from '../types/Secret.type';
 
+// TODO - not currently being utilized in absence of project-level components
 export default function componentSelectionPrompt(
     secrets: Secret[],
     other?: boolean

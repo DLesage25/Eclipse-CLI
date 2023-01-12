@@ -8,12 +8,12 @@ import projectSelectionPrompt from '../prompts/projectSelection.prompt';
 import singleProjectActionPrompt from '../prompts/singleProjectAction.prompt';
 import componentSelectionPrompt from '../prompts/componentSelection.prompt';
 import environmentSelectionPrompt from '../prompts/environmentSelection.prompt';
+import componentCreationPrompt from '../prompts/componentCreation.prompt';
 import Secrets from '../secrets';
 import { FileUtil } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
 import { Project } from '../types/Project.type';
 import { helpMessage } from '../constants/messages';
-import componentCreationPrompt from 'eclipse/prompts/componentCreation.prompt';
 
 @injectable()
 export default class Projects {
@@ -299,9 +299,11 @@ export default class Projects {
             project.secrets
         );
 
+        // TODO - this may need to create a component at the project level
         if (selection === 'Other') {
-            const { component } = await componentCreationPrompt();
-            this.projectConfig.createConfigFile(project._id, component);
+            const { component: createdComponent } =
+                await componentCreationPrompt();
+            this.projectConfig.createConfigFile(project._id, createdComponent);
 
             return;
         }
