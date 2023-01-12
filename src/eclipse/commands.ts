@@ -88,16 +88,15 @@ export class Commands {
     private async processRemoveCommand(
         postArguments: Array<string>
     ): Promise<boolean> {
-        const [removeArgs, secretName] = postArguments;
+        const [environment, secretName] = postArguments;
 
-        if (!removeArgs.includes('/')) {
+        if (!environment || !secretName) {
             this.logger.error(
-                'Please specify a component and environment: `eclipse rm component/environment secret_name`'
+                'Please specify an environment and secret: `eclipse rm staging secret_name`'
             );
             return false;
         }
 
-        const [component, environment] = removeArgs.split('/');
         const ctx = await this.projects.getCurrentContext();
 
         if (!ctx) {
@@ -106,7 +105,7 @@ export class Commands {
 
         const secrets = await this.secrets.getFullSecrets(
             ctx.project,
-            component,
+            ctx.component,
             environment
         );
 
@@ -172,9 +171,9 @@ export class Commands {
     ): Promise<boolean> {
         const [environment, secretName, secretValue] = postArguments;
 
-        if (!environment) {
+        if (!environment || !secretName || !secretValue) {
             this.logger.error(
-                'Please specify an environment: `eclipse add <environment> <secret_name> <secret_value>`'
+                'Please specify an environment, secret name, and secret value: `eclipse add <environment> <secret_name> <secret_value>`'
             );
             return false;
         }
