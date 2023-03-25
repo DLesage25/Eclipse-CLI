@@ -5,7 +5,6 @@ import Projects from './projects';
 import Auth from './auth';
 import Secrets from './secrets';
 import { Logger } from './utils/logger';
-import { Project } from './types/Project.type';
 import { PROJECT_COMMANDS } from './constants/projectCommands';
 import { helpMessage } from './constants/messages';
 
