@@ -5,7 +5,6 @@ import Projects from './projects';
 import Auth from './auth';
 import Secrets from './secrets';
 import { Logger } from './utils/logger';
-import { Project } from './types/Project.type';
 import { PROJECT_COMMANDS } from './constants/projectCommands';
 import { helpMessage } from './constants/messages';
 
@@ -88,25 +87,24 @@ export class Commands {
     private async processRemoveCommand(
         postArguments: Array<string>
     ): Promise<boolean> {
-        const [removeArgs, secretName] = postArguments;
+        const [environment, secretName] = postArguments;
 
-        if (!removeArgs.includes('/')) {
+        if (!environment || !secretName) {
             this.logger.error(
-                'Please specify a component and environment: `eclipse rm component/environment secret_name`'
+                'Please specify an environment and secret: `eclipse rm staging secret_name`'
             );
             return false;
         }
 
-        const [component, environment] = removeArgs.split('/');
-        const project = await this.getCurrentProject();
+        const ctx = await this.projects.getCurrentContext();
 
-        if (!project) {
+        if (!ctx) {
             return false;
         }
 
         const secrets = await this.secrets.getFullSecrets(
-            project,
-            component,
+            ctx.project,
+            ctx.component,
             environment
         );
 
@@ -118,7 +116,7 @@ export class Commands {
 
         if (!secret) {
             this.logger.error(
-                `Secret ${secretName} not found under project ${project.name}`
+                `Secret ${secretName} not found under project ${ctx.project.name}`
             );
             return false;
         }
@@ -140,39 +138,29 @@ export class Commands {
         return true;
     }
 
-    private async getCurrentProject(): Promise<Project | null> {
-        const project = await this.projects.getCurrentProject();
-
-        if (!project) {
-            this.logger.error(
-                'Could not fetch current project. Please try again.'
-            );
-            return null;
-        }
-        return project;
-    }
-
     private async processListCommand(
         postArguments: Array<string>
     ): Promise<boolean> {
-        const [listArgs] = postArguments;
+        const [environment] = postArguments;
 
-        if (!listArgs) {
+        if (!environment) {
             this.logger.error(
-                'Please specify a component and environment: `eclipse ls component/environment`.'
+                'Please specify an environment: `eclipse ls staging`'
             );
             return false;
         }
 
-        const [component, environment] = listArgs.split('/');
+        const ctx = await this.projects.getCurrentContext();
 
-        const project = await this.getCurrentProject();
-
-        if (!project) {
+        if (!ctx) {
             return false;
         }
 
-        await this.projects.viewProjectSecrets(project, component, environment);
+        await this.projects.viewProjectSecrets(
+            ctx.project,
+            ctx.component,
+            environment
+        );
 
         return true;
     }
@@ -180,28 +168,26 @@ export class Commands {
     private async processAddCommand(
         postArguments: Array<string>
     ): Promise<boolean> {
-        const [addArgs, secretName, secretValue] = postArguments;
+        const [environment, secretName, secretValue] = postArguments;
 
-        if (!addArgs.includes('/')) {
+        if (!environment || !secretName || !secretValue) {
             this.logger.error(
-                'Please specify a component and environment: `eclipse add component/environment secret_name secret_value`'
+                'Please specify an environment, secret name, and secret value: `eclipse add <environment> <secret_name> <secret_value>`'
             );
             return false;
         }
 
-        const [component, environment] = addArgs.split('/');
+        const ctx = await this.projects.getCurrentContext();
 
-        const project = await this.getCurrentProject();
-
-        if (!project) {
+        if (!ctx) {
             return false;
         }
 
         await this.secrets.addSecret(
-            project,
+            ctx.project,
             secretName,
             secretValue,
-            component,
+            ctx.component,
             environment
         );
         return true;
@@ -210,21 +196,25 @@ export class Commands {
     private async processInjectCommand(
         postArguments: Array<string>
     ): Promise<boolean> {
-        const [injectArg, coreProcess, ...processArgs] = postArguments;
+        const [environment, coreProcess, ...processArgs] = postArguments;
 
-        if (!injectArg.includes('/')) {
+        if (!environment) {
             this.logger.error(
-                'Please specify a component and environment: `eclipse i component/environment node`'
+                'Please specify an environment: `eclipse i staging node`'
             );
             return false;
         }
 
-        const [component, environment] = injectArg.split('/');
+        const ctx = await this.projects.getCurrentContext();
+
+        if (!ctx) {
+            return false;
+        }
 
         await this.projects.injectLocalProjectSecrets(
             coreProcess,
             processArgs,
-            component,
+            ctx.component,
             environment
         );
 

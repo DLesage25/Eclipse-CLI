@@ -8,6 +8,7 @@ import projectSelectionPrompt from '../prompts/projectSelection.prompt';
 import singleProjectActionPrompt from '../prompts/singleProjectAction.prompt';
 import componentSelectionPrompt from '../prompts/componentSelection.prompt';
 import environmentSelectionPrompt from '../prompts/environmentSelection.prompt';
+import componentCreationPrompt from '../prompts/componentCreation.prompt';
 import Secrets from '../secrets';
 import { FileUtil } from '../utils/fileUtil';
 import { Logger } from '../utils/logger';
@@ -36,7 +37,7 @@ export default class Projects {
             case 'print':
                 return this.printSecrets(project);
             case 'createConfig':
-                return this.projectConfig.createConfigFile(project._id);
+                return this.createConfigFile(project);
             case 'help':
                 this.logger.message(helpMessage);
                 return;
@@ -232,7 +233,9 @@ export default class Projects {
         return this.projectConfig.checkIfExists();
     }
 
-    public async getCurrentProject(): Promise<Project | undefined> {
+    public async getCurrentContext(): Promise<
+        { project: Project; component: string } | undefined
+    > {
         const configData = await this.projectConfig.readConfigFile();
 
         if (!configData || !configData.PROJECT) {
@@ -242,25 +245,29 @@ export default class Projects {
             return;
         }
 
-        return this.getProject(configData.PROJECT);
+        const project = await this.getProject(configData.PROJECT);
+
+        return { project, component: configData.COMPONENT };
     }
 
     public async getCurrentProjectSecrets(
         component: string,
         environment: string
     ) {
-        const project = await this.getCurrentProject();
+        const ctx = await this.getCurrentContext();
 
-        if (!project) return;
+        if (!ctx) return;
 
         const secrets = await this.secrets.getPartialSecrets(
-            project,
+            ctx.project,
             component,
             environment
         );
 
         if (!secrets) {
-            this.logger.warning(`No secrets found for project ${project.name}`);
+            this.logger.warning(
+                `No secrets found for project ${ctx.project.name}`
+            );
             return;
         }
 
@@ -278,5 +285,30 @@ export default class Projects {
             environment
         );
         return this.shell.initialize(coreProcess, processArgs, secrets || {});
+    }
+
+    private async createConfigFile(project: Project) {
+        if (!project.secrets.length) {
+            const { component } = await componentCreationPrompt();
+            this.projectConfig.createConfigFile(project._id, component);
+
+            return;
+        }
+
+        const { component: selection } = await componentSelectionPrompt(
+            project.secrets
+        );
+
+        // TODO - this may need to create a component at the project level
+        if (selection === 'Other') {
+            const { component: createdComponent } =
+                await componentCreationPrompt();
+            this.projectConfig.createConfigFile(project._id, createdComponent);
+
+            return;
+        }
+
+        this.projectConfig.createConfigFile(project._id, selection);
+        return;
     }
 }

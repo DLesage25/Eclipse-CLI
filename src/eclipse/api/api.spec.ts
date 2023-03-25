@@ -293,7 +293,9 @@ describe('API', () => {
             value: 'value',
             projectId: 'projectId',
             name: 'name',
-            classifiers: ['classifier1', 'classifier2'],
+            environment: 'environment',
+            component: 'component',
+            ownerId: 'ownerId',
         };
 
         it('should post to create secrets endpoint with dto', async () => {
